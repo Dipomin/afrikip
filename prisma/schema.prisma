@@ -1,0 +1,545 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model ap_actionscheduler_actions {
+  action_id            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  hook                 String
+  status               String    @db.VarChar(20)
+  scheduled_date_gmt   DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  scheduled_date_local DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  args                 String?
+  schedule             String?   @db.LongText
+  group_id             BigInt    @default(0) @db.UnsignedBigInt
+  attempts             Int       @default(0)
+  last_attempt_gmt     DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  last_attempt_local   DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  claim_id             BigInt    @default(0) @db.UnsignedBigInt
+  extended_args        String?   @db.VarChar(8000)
+
+  @@index([args], map: "args")
+  @@index([claim_id], map: "claim_id")
+  @@index([claim_id, status, scheduled_date_gmt], map: "claim_id_status_scheduled_date_gmt")
+  @@index([group_id], map: "group_id")
+  @@index([hook], map: "hook")
+  @@index([last_attempt_gmt], map: "last_attempt_gmt")
+  @@index([scheduled_date_gmt], map: "scheduled_date_gmt")
+  @@index([status], map: "status")
+}
+
+model ap_actionscheduler_claims {
+  claim_id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  date_created_gmt DateTime @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+
+  @@index([date_created_gmt], map: "date_created_gmt")
+}
+
+model ap_actionscheduler_groups {
+  group_id BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+  slug     String @db.VarChar(255)
+
+  @@index([slug(length: 191)], map: "slug")
+}
+
+model ap_actionscheduler_logs {
+  log_id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  action_id      BigInt    @db.UnsignedBigInt
+  message        String    @db.Text
+  log_date_gmt   DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  log_date_local DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+
+  @@index([action_id], map: "action_id")
+  @@index([log_date_gmt], map: "log_date_gmt")
+}
+
+model ap_cli_scripts {
+  id                    Int    @id @default(autoincrement())
+  cliscript_title       String @db.Text
+  cliscript_category    String @db.VarChar(100)
+  cliscript_type        Int?   @default(0)
+  cliscript_status      String @db.VarChar(100)
+  cliscript_description String @db.LongText
+  cliscript_key         String @db.VarChar(100)
+  type                  Int    @default(0)
+}
+
+model ap_cm_popfly_history {
+  event_id       BigInt                          @id @default(autoincrement())
+  event_type     ap_cm_popfly_history_event_type
+  campaign_id    BigInt?
+  amount         Int?                            @default(1)
+  banner_id      BigInt?
+  referer_url    String                          @db.VarChar(150)
+  remote_ip      String                          @db.VarChar(20)
+  webpage_url    String                          @db.VarChar(200)
+  remote_country String                          @db.VarChar(20)
+  remote_city    String                          @default("") @db.VarChar(30)
+  regdate        DateTime                        @default(now()) @db.Timestamp(0)
+}
+
+model ap_commentmeta {
+  meta_id    BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
+  comment_id BigInt  @default(0) @db.UnsignedBigInt
+  meta_key   String? @db.VarChar(255)
+  meta_value String? @db.LongText
+
+  @@index([comment_id], map: "comment_id")
+  @@index([meta_key(length: 191)], map: "meta_key")
+}
+
+model ap_comments {
+  comment_ID           BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  comment_post_ID      BigInt   @default(0) @db.UnsignedBigInt
+  comment_author       String   @db.TinyText
+  comment_author_email String   @default("") @db.VarChar(100)
+  comment_author_url   String   @default("") @db.VarChar(200)
+  comment_author_IP    String   @default("") @db.VarChar(100)
+  comment_date         DateTime @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  comment_date_gmt     DateTime @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  comment_content      String   @db.Text
+  comment_karma        Int      @default(0)
+  comment_approved     String   @default("1") @db.VarChar(20)
+  comment_agent        String   @default("") @db.VarChar(255)
+  comment_type         String   @default("comment") @db.VarChar(20)
+  comment_parent       BigInt   @default(0) @db.UnsignedBigInt
+  user_id              BigInt   @default(0) @db.UnsignedBigInt
+
+  @@index([comment_approved, comment_date_gmt], map: "comment_approved_date_gmt")
+  @@index([comment_author_email(length: 10)], map: "comment_author_email")
+  @@index([comment_date_gmt], map: "comment_date_gmt")
+  @@index([comment_parent], map: "comment_parent")
+  @@index([comment_post_ID], map: "comment_post_ID")
+}
+
+model ap_defender_audit_log {
+  id          Int    @id @default(autoincrement()) @db.UnsignedInt
+  timestamp   Int
+  event_type  String @db.VarChar(255)
+  action_type String @db.VarChar(255)
+  site_url    String @db.VarChar(255)
+  user_id     Int
+  context     String @db.VarChar(255)
+  ip          String @db.VarChar(255)
+  msg         String @db.VarChar(255)
+  blog_id     Int
+  synced      Int
+  ttl         Int
+
+  @@index([action_type], map: "action_type")
+  @@index([context], map: "context")
+  @@index([event_type], map: "event_type")
+  @@index([ip], map: "ip")
+  @@index([user_id], map: "user_id")
+}
+
+model ap_defender_email_log {
+  id        Int    @id @default(autoincrement()) @db.UnsignedInt
+  timestamp Int
+  source    String @db.VarChar(255)
+  to        String @db.VarChar(255)
+
+  @@index([source], map: "source")
+}
+
+model ap_defender_lockout {
+  id              Int     @id @default(autoincrement()) @db.UnsignedInt
+  ip              String? @db.VarChar(255)
+  status          String? @db.VarChar(16)
+  lockout_message String? @db.Text
+  release_time    Int?
+  lock_time       Int?
+  lock_time_404   Int?
+  attempt         Int?
+  attempt_404     Int?
+  meta            String? @db.Text
+
+  @@index([attempt], map: "attempt")
+  @@index([attempt_404], map: "attempt_404")
+  @@index([ip], map: "ip")
+  @@index([status], map: "status")
+}
+
+model ap_defender_lockout_log {
+  id               Int     @id @default(autoincrement()) @db.UnsignedInt
+  log              String? @db.Text
+  ip               String? @db.VarChar(255)
+  date             Int?
+  type             String? @db.VarChar(16)
+  user_agent       String? @db.VarChar(255)
+  blog_id          Int?
+  tried            String? @db.VarChar(255)
+  country_iso_code String? @db.Char(2)
+
+  @@index([country_iso_code], map: "country_iso_code")
+  @@index([ip], map: "ip")
+  @@index([tried], map: "tried")
+  @@index([type], map: "type")
+}
+
+model ap_defender_scan {
+  id              Int      @id @default(autoincrement()) @db.UnsignedInt
+  percent         Float    @db.Float
+  total_tasks     Int      @db.TinyInt
+  task_checkpoint String   @db.VarChar(255)
+  status          String   @db.VarChar(255)
+  date_start      DateTime @db.DateTime(0)
+  date_end        DateTime @db.DateTime(0)
+  is_automation   Boolean
+}
+
+model ap_defender_scan_item {
+  id        Int    @id @default(autoincrement()) @db.UnsignedInt
+  parent_id Int
+  type      String @db.VarChar(255)
+  status    String @db.VarChar(255)
+  raw_data  String @db.Text
+
+  @@index([status], map: "status")
+  @@index([type], map: "type")
+}
+
+model ap_elfsight_youtube_gallery_widgets {
+  id           Int    @id @default(autoincrement()) @db.UnsignedInt
+  name         String @db.VarChar(255)
+  time_created String @db.VarChar(10)
+  time_updated String @db.VarChar(10)
+  active       Int    @default(1)
+  options      String @db.Text
+}
+
+model ap_fg_redirect {
+  old_url   String  @id
+  id        BigInt  @db.UnsignedBigInt
+  type      String  @db.VarChar(20)
+  activated Boolean
+}
+
+model ap_hmwp_ms_intrusions {
+  id           Int      @id @default(autoincrement()) @db.UnsignedInt
+  name         String   @db.VarChar(128)
+  value        String   @db.Text
+  page         String   @db.VarChar(255)
+  tags         String   @db.VarChar(50)
+  ip           String   @default("0") @db.VarChar(16)
+  user_id      Int      @db.UnsignedInt
+  total_impact Int      @db.UnsignedInt
+  impact       Int      @db.UnsignedInt
+  origin       String   @db.VarChar(16)
+  created      DateTime @db.DateTime(0)
+}
+
+model ap_links {
+  link_id          BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  link_url         String   @default("") @db.VarChar(255)
+  link_name        String   @default("") @db.VarChar(255)
+  link_image       String   @default("") @db.VarChar(255)
+  link_target      String   @default("") @db.VarChar(25)
+  link_description String   @default("") @db.VarChar(255)
+  link_visible     String   @default("Y") @db.VarChar(20)
+  link_owner       BigInt   @default(1) @db.UnsignedBigInt
+  link_rating      Int      @default(0)
+  link_updated     DateTime @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  link_rel         String   @default("") @db.VarChar(255)
+  link_notes       String   @db.MediumText
+  link_rss         String   @default("") @db.VarChar(255)
+
+  @@index([link_visible], map: "link_visible")
+}
+
+model ap_options {
+  option_id    BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+  option_name  String @unique(map: "option_name") @default("")
+  option_value String @db.LongText
+  autoload     String @default("yes") @db.VarChar(20)
+
+  @@index([autoload], map: "autoload")
+}
+
+model ap_popularpostsdata {
+  postid      BigInt   @id
+  day         DateTime @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  last_viewed DateTime @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  pageviews   BigInt?  @default(1)
+}
+
+model ap_popularpostssummary {
+  ID            BigInt   @id @default(autoincrement())
+  postid        BigInt
+  pageviews     BigInt   @default(1)
+  view_date     DateTime @default(dbgenerated("('0000-00-00')")) @db.Date
+  last_viewed   DateTime @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  view_datetime DateTime @db.DateTime(0)
+
+  @@unique([postid, view_date], map: "ID_date")
+  @@index([last_viewed], map: "last_viewed")
+  @@index([postid], map: "postid")
+  @@index([view_date], map: "view_date")
+  @@index([view_datetime], map: "view_datetime")
+}
+
+model ap_popularpoststransients {
+  ID        BigInt   @id @default(autoincrement())
+  tkey      String
+  tkey_date DateTime @db.DateTime(0)
+}
+
+model ap_postmeta {
+  meta_id    BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
+  post_id    BigInt  @default(0) @db.UnsignedBigInt
+  meta_key   String? @db.VarChar(255)
+  meta_value String? @db.LongText
+
+  @@index([meta_key(length: 191)], map: "meta_key")
+  @@index([post_id], map: "post_id")
+}
+
+model ap_posts {
+  ID                    BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  post_author           BigInt   @default(0) @db.UnsignedBigInt
+  post_date             DateTime @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  post_date_gmt         DateTime @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  post_content          String   @db.LongText
+  post_title            String   @db.Text
+  post_excerpt          String   @db.Text
+  post_status           String   @default("publish") @db.VarChar(20)
+  comment_status        String   @default("open") @db.VarChar(20)
+  ping_status           String   @default("open") @db.VarChar(20)
+  post_password         String   @default("") @db.VarChar(255)
+  post_name             String   @default("") @db.VarChar(200)
+  to_ping               String   @db.Text
+  pinged                String   @db.Text
+  post_modified         DateTime @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  post_modified_gmt     DateTime @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  post_content_filtered String   @db.LongText
+  post_parent           BigInt   @default(0) @db.UnsignedBigInt
+  guid                  String   @default("") @db.VarChar(255)
+  menu_order            Int      @default(0)
+  post_type             String   @default("post") @db.VarChar(20)
+  post_mime_type        String   @default("") @db.VarChar(100)
+  comment_count         BigInt   @default(0)
+
+  @@index([post_author], map: "post_author")
+  @@index([post_name(length: 191)], map: "post_name")
+  @@index([post_parent], map: "post_parent")
+  @@index([post_type, post_status, post_date, ID], map: "type_status_date")
+}
+
+model ap_smush_dir_images {
+  id         Int      @id @unique(map: "id") @default(autoincrement()) @db.MediumInt
+  path       String   @db.Text
+  path_hash  String?  @unique(map: "path_hash") @db.Char(32)
+  resize     String?  @db.VarChar(55)
+  lossy      String?  @db.VarChar(55)
+  error      String?  @db.VarChar(55)
+  image_size Int?     @db.UnsignedInt
+  orig_size  Int?     @db.UnsignedInt
+  file_time  Int?     @db.UnsignedInt
+  last_scan  DateTime @default(dbgenerated("('0000-00-00 00:00:00')")) @db.Timestamp(0)
+  meta       String?  @db.Text
+
+  @@index([image_size], map: "image_size")
+}
+
+model ap_snp_log {
+  action_date   DateTime @default(now()) @db.Timestamp(0)
+  action        String   @db.VarChar(20)
+  id            BigInt   @id @default(autoincrement())
+  email         String?  @db.VarChar(70)
+  ip            String   @db.VarChar(64)
+  browser       String   @db.VarChar(255)
+  list          String?  @db.VarChar(32)
+  custom_fields String?  @db.Text
+  popup_id      Int
+  referer       String?  @db.VarChar(255)
+  errors        String?  @db.Text
+}
+
+model ap_snp_stats {
+  date  DateTime @db.Date
+  ID    BigInt
+  AB_ID BigInt
+  imps  Int
+  convs Int
+
+  @@unique([date, ID, AB_ID], map: "date_ID")
+  @@index([AB_ID], map: "AB_ID")
+  @@index([ID], map: "ID")
+  @@index([date], map: "date")
+}
+
+model ap_term_relationships {
+  object_id        BigInt @default(0) @db.UnsignedBigInt
+  term_taxonomy_id BigInt @default(0) @db.UnsignedBigInt
+  term_order       Int    @default(0)
+
+  @@id([object_id, term_taxonomy_id])
+  @@index([term_taxonomy_id], map: "term_taxonomy_id")
+}
+
+model ap_term_taxonomy {
+  term_taxonomy_id BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+  term_id          BigInt @default(0) @db.UnsignedBigInt
+  taxonomy         String @default("") @db.VarChar(32)
+  description      String @db.LongText
+  parent           BigInt @default(0) @db.UnsignedBigInt
+  count            BigInt @default(0)
+
+  @@unique([term_id, taxonomy], map: "term_id_taxonomy")
+  @@index([taxonomy], map: "taxonomy")
+}
+
+model ap_termmeta {
+  meta_id    BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
+  term_id    BigInt  @default(0) @db.UnsignedBigInt
+  meta_key   String? @db.VarChar(255)
+  meta_value String? @db.LongText
+
+  @@index([meta_key(length: 191)], map: "meta_key")
+  @@index([term_id], map: "term_id")
+}
+
+model ap_terms {
+  term_id    BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+  name       String @default("") @db.VarChar(200)
+  slug       String @default("") @db.VarChar(200)
+  term_group BigInt @default(0)
+
+  @@index([name(length: 191)], map: "name")
+  @@index([slug(length: 191)], map: "slug")
+}
+
+model ap_tm_taskmeta {
+  meta_id    BigInt  @id @default(autoincrement())
+  task_id    BigInt  @default(0)
+  meta_key   String? @db.VarChar(255)
+  meta_value String? @db.LongText
+
+  @@index([meta_key(length: 191)], map: "meta_key")
+  @@index([task_id], map: "task_id")
+}
+
+model ap_tm_tasks {
+  id               Int      @id @default(autoincrement())
+  user_id          BigInt
+  type             String   @db.VarChar(300)
+  class_identifier String?  @default("0") @db.VarChar(300)
+  attempts         Int?     @default(0)
+  description      String?  @db.VarChar(300)
+  time_created     DateTime @default(now()) @db.Timestamp(0)
+  last_locked_at   BigInt?  @default(0)
+  status           String?  @db.VarChar(300)
+
+  @@index([user_id], map: "user_id")
+}
+
+model ap_usermeta {
+  umeta_id   BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id    BigInt  @default(0) @db.UnsignedBigInt
+  meta_key   String? @db.VarChar(255)
+  meta_value String? @db.LongText
+
+  @@index([meta_key(length: 191)], map: "meta_key")
+  @@index([user_id], map: "user_id")
+}
+
+model ap_users {
+  ID                  BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  user_login          String   @default("") @db.VarChar(60)
+  user_pass           String   @default("") @db.VarChar(255)
+  user_nicename       String   @default("") @db.VarChar(50)
+  user_email          String   @default("") @db.VarChar(100)
+  user_url            String   @default("") @db.VarChar(100)
+  user_registered     DateTime @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  user_activation_key String   @default("") @db.VarChar(255)
+  user_status         Int      @default(0)
+  display_name        String   @default("") @db.VarChar(250)
+
+  @@index([user_email], map: "user_email")
+  @@index([user_login], map: "user_login_key")
+  @@index([user_nicename], map: "user_nicename")
+}
+
+model ap_wprss_logs {
+  id      BigInt   @id @default(autoincrement())
+  date    DateTime @default(now()) @db.Timestamp(0)
+  level   String   @db.VarChar(30)
+  message String   @db.Text
+  feed_id String?  @db.VarChar(100)
+}
+
+model ap_wt_iew_action_history {
+  id            Int    @id @default(autoincrement())
+  template_type String @db.VarChar(255)
+  item_type     String @db.VarChar(255)
+  file_name     String @db.VarChar(255)
+  created_at    Int    @default(0)
+  status        Int    @default(0)
+  status_text   String @db.VarChar(255)
+  offset        Int    @default(0)
+  total         Int    @default(0)
+  data          String @db.LongText
+}
+
+model ap_wt_iew_cron {
+  id              Int    @id @default(autoincrement())
+  status          Int    @default(0)
+  old_status      Int    @default(0)
+  action_type     String @db.VarChar(255)
+  schedule_type   String @db.VarChar(50)
+  item_type       String @db.VarChar(255)
+  data            String @db.LongText
+  start_time      Int
+  cron_data       String @db.Text
+  last_run        Int
+  next_offset     Int    @default(0)
+  history_id_list String @db.Text
+  history_id      Int
+}
+
+model ap_wt_iew_ftp {
+  id           Int    @id @default(autoincrement())
+  name         String @db.VarChar(255)
+  server       String @db.VarChar(255)
+  user_name    String @db.VarChar(255)
+  password     String @db.VarChar(255)
+  port         Int    @default(21)
+  ftps         Int    @default(0)
+  is_sftp      Int    @default(0)
+  passive_mode Int    @default(0)
+  export_path  String @db.VarChar(255)
+  import_path  String @db.VarChar(255)
+}
+
+model ap_wt_iew_mapping_template {
+  id            Int    @id @default(autoincrement())
+  template_type String @db.VarChar(255)
+  item_type     String @db.VarChar(255)
+  name          String @db.VarChar(255)
+  data          String @db.LongText
+}
+
+model ap_yydev_tagmanager {
+  id       Int     @id @default(autoincrement()) @db.UnsignedInt
+  page_id  Int?
+  tag_type String? @db.Text
+  tag_code String? @db.Text
+}
+
+model ap_metadata {
+  id              BigInt @id @default(autoincrement())
+  post_id         BigInt @unique(map: "post_id")
+  post_meta_title String @db.Text
+  post_meta_desc  String @db.Text
+  post_meta_tags  String @db.Text
+  ap_post         Int
+}
+
+enum ap_cm_popfly_history_event_type {
+  cl
+  im
+}

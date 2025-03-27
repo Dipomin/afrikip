@@ -1,0 +1,40 @@
+User-agent: *
+Allow: /
+Allow: /article/
+Allow: /categorie/
+
+Disallow: /mobile-payment/
+
+User-agent: Googlebot
+Allow: /article/
+Allow: /categorie/
+Allow: /images/
+Allow: /pages/
+Allow: /public/
+Allow: /
+
+User-agent: googlebot-news
+Allow: /article/
+Allow: /categorie/
+Allow: /images/
+Allow: /public/
+Allow: /pages/
+Allow: /
+
+User-agent: Twitterbot
+Allow: /article/
+Allow: /categorie/
+Allow: /images/
+Allow: /api/
+Allow: /
+
+User-agent: facebookexternalhit/1.1
+Allow: /article/
+Allow: /categorie/
+Allow: /images/
+Allow: /article/
+Allow: /api
+Allow: /
+
+Sitemap: https://www.afrikipresse.fr/sitemaps/sitemap-index.xml
+

@@ -1,0 +1,16 @@
+.pdfViewerContainer canvas {
+  max-width: 90%;
+  max-height: 90%;
+}
+
+.pdfViewer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+  max-height: 90vh; /* Adjust as needed */
+}
+
+.pdfViewer canvas {
+  margin-bottom: 1rem;
+}

@@ -1,0 +1,161 @@
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import { Button } from "../../components/ui/button";
+import Layout from "../../components/layout";
+import { useUser } from "@supabase/auth-helpers-react";
+import Container from "../../components/container";
+import { PlusCircle, Search } from "lucide-react";
+import { ClipLoader } from "react-spinners";
+
+interface Article {
+  ID: string;
+  title: string;
+  date: string;
+  excerpt: string;
+  slug: string;
+  content: string;
+}
+
+const TagPage: React.FC = () => {
+  const router = useRouter();
+  const [keyword, setKeyword] = useState<string | null>(null);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [totalResults, setTotalResults] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    // Extract the keyword from the pathname
+    const pathSegments = router.asPath.split("/");
+    const keywordFromPath = decodeURIComponent(
+      pathSegments[pathSegments.length - 1]
+    ).replace("-", " ");
+    setKeyword(keywordFromPath);
+
+    if (keywordFromPath) {
+      searchArticles(keywordFromPath, 1);
+    }
+  }, [router.asPath]);
+
+  const searchArticles = async (keyword: string, page: number) => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/tagsearch", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: `
+            query SearchArticles($keyword: String, $page: Int, $limit: Int) {
+              searchArticles(keyword: $keyword, page: $page, limit: $limit) {
+                ID
+                title
+                date
+                excerpt
+                slug
+                content
+              }
+              totalCount(keyword: $keyword)
+            }
+          `,
+          variables: {
+            keyword,
+            page,
+            limit: 50,
+          },
+        }),
+      });
+
+      const responseBody = await response.json();
+
+      if (responseBody.errors) {
+        console.error("API errors:", responseBody.errors);
+        return;
+      }
+
+      const { searchArticles, totalCount } = responseBody.data;
+
+      if (page === 1) {
+        setArticles(searchArticles);
+      } else {
+        setArticles((prevArticles) => [...prevArticles, ...searchArticles]);
+      }
+
+      setTotalResults(totalCount);
+      setCurrentPage(page);
+    } catch (error) {
+      console.error("Error fetching articles:", error);
+    }
+    setLoading(false);
+  };
+
+  const loadMoreArticles = () => {
+    if (keyword) {
+      searchArticles(keyword, currentPage + 1);
+    }
+  };
+
+  const user = useUser();
+  const userId = user?.id;
+
+  return (
+    <Layout preview={""} user={userId}>
+      <Container>
+        <div className="flex">
+          <div>
+            <h1 className="flex lg:text-5xl text-3xl text-center uppercase text-red-600 font-extrabold font-serif">
+              <Search className="pr-4" size={48} /> Mot clé
+            </h1>
+            <hr />
+
+            <h1 className="lg:text-3xl text-xl text-center font-bold my-4 font-serif">
+              {totalResults} articles trouvés contenant &quot;{keyword}&quot;
+            </h1>
+            {loading ? (
+              <div className="flex flex-col items-center pb-10">
+                <ClipLoader size={64} color="#ff0101" />
+                <p className="text-[#ff0101]">Recherche en cours...</p>
+              </div>
+            ) : (
+              <>
+                <ul>
+                  {articles.map((article) => (
+                    <li key={article.ID} className="my-4">
+                      <a
+                        href={`/article/${article.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <h3 className="text-xl font-bold hover:underline font-serif">
+                          {article.title}
+                        </h3>
+                      </a>
+                      <small>
+                        Publié le {new Date(article.date).toLocaleDateString()}
+                      </small>
+                      <p className="line-clamp-3 my-4">{article.content}</p>
+                      <hr />
+                    </li>
+                  ))}
+                </ul>
+                <div>
+                  {currentPage * 50 < totalResults && (
+                    <div className="flex justify-center my-6">
+                      <Button onClick={loadMoreArticles} disabled={loading}>
+                        Charger plus de résultats{" "}
+                        <PlusCircle className="pl-2" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </Container>
+    </Layout>
+  );
+};
+
+export default TagPage;
