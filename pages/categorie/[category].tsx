@@ -1,7 +1,7 @@
 import { GetServerSideProps } from "next";
 import { PrismaClient } from "@prisma/client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import striptags from "striptags";
 import he from "he";
 
@@ -134,6 +134,60 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 };
 
+const CATEGORY_META = {
+  politique: {
+    title: "Actualités Politiques Africaines | Afrikipresse",
+    description:
+      "Suivez toute l'actualité politique africaine : élections, gouvernance, réformes et analyses politiques approfondies des pays d'Afrique.",
+    keywords:
+      "politique africaine, élections afrique, gouvernance, démocratie, politique",
+  },
+  economie: {
+    title: "Actualités Économiques en Afrique | Afrikipresse",
+    description:
+      "Informations économiques africaines : marchés financiers, investissements, croissance économique et développement des pays africains.",
+    keywords:
+      "économie africaine, business afrique, finances, investissements, développement économique",
+  },
+  societe: {
+    title: "Actualités Société et Faits de Société en Afrique | Afrikipresse",
+    description:
+      "Découvrez les actualités sociales et sociétales en Afrique : éducation, santé, emploi, conditions de vie et enjeux sociaux.",
+    keywords:
+      "société africaine, faits divers afrique, éducation, santé, social",
+  },
+  sport: {
+    title: "Actualités Sport en Afrique | Afrikipresse",
+    description:
+      "Toute l'actualité sportive africaine : football, athlétisme, basketball et autres sports. Suivez les compétitions et les athlètes africains.",
+    keywords: "sport afrique, football africain, CAN, athlétisme, basketball",
+  },
+  culture: {
+    title: "Actualités Culturelles Africaines | Afrikipresse",
+    description:
+      "L'actualité culturelle africaine : arts, musique, cinéma, littérature et traditions. Découvrez la richesse culturelle de l'Afrique.",
+    keywords: "culture africaine, arts, musique, cinéma, traditions",
+  },
+  afrique: {
+    title: "Actualités Générales d'Afrique | Afrikipresse",
+    description:
+      "Suivez l'actualité générale du continent africain : politique, économie, société et développement des pays d'Afrique.",
+    keywords: "afrique, actualités afrique, news afrique, continent africain",
+  },
+  international: {
+    title: "Actualités Internationales | Afrikipresse",
+    description:
+      "L'actualité internationale vue d'Afrique : relations internationales, diplomatie et impact mondial sur le continent africain.",
+    keywords: "international, monde, actualités internationales, diplomatie",
+  },
+  opinion: {
+    title: "Tribune et Opinions sur l'Afrique | Afrikipresse",
+    description:
+      "Analyses, opinions et points de vue sur l'actualité africaine. Découvrez les tribunes et débats sur les enjeux du continent.",
+    keywords: "opinions, analyses, tribunes, débats, points de vue",
+  },
+};
+
 const PostsPage = ({
   posts,
   categories,
@@ -198,33 +252,101 @@ const PostsPage = ({
     );
   };
   const hostAdress = "https://adm.afrikipresse.fr";
-  //console.log("POSTS IMAGES", posts);
+
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  const activeCategoryMeta = category
+    ? CATEGORY_META[category.toLowerCase()]
+    : {
+        title: "Toute l'actualité africaine | Afrikipresse",
+        description:
+          "Suivez toute l'actualité africaine et internationale sur Afrikipresse. Informations fiables et analyses approfondies sur l'Afrique.",
+        keywords:
+          "actualités afrique, news afrique, information africaine, presse africaine",
+      };
 
   return (
     <Layout preview={""} user={""}>
       <Container>
         <Head>
-          <title>Afrikipresse</title>
+          <title>{activeCategoryMeta.title}</title>
+          <meta name="description" content={activeCategoryMeta.description} />
+          <meta name="keywords" content={activeCategoryMeta.keywords} />
+          <meta property="og:title" content={activeCategoryMeta.title} />
+          <meta
+            property="og:description"
+            content={activeCategoryMeta.description}
+          />
+          <meta
+            property="og:url"
+            content={`https://www.afrikipresse.com/categorie/${category || ""}`}
+          />
+          <meta property="og:site_name" content="Afrikipresse" />
+          <meta property="og:type" content="website" />
           <meta property="og:image" content="/images/afrikipresse.png" />
+          <meta property="og:image:alt" content="Afrikipresse" />
+          <meta property="og:locale" content="fr_FR" />
+          <meta property="twitter:card" content="summary_large_image" />
+          <meta property="twitter:title" content={activeCategoryMeta.title} />
+          <meta
+            property="twitter:description"
+            content={activeCategoryMeta.description}
+          />
+          <meta property="twitter:image" content="/images/afrikipresse.png" />
+          <meta property="twitter:image:alt" content="Afrikipresse" />
+          <meta property="fb:app_id" content="692268107519885" />
+          <meta property="twitter:site" content="@afrikipresse" />
+          <meta property="twitter:creator" content="@afrikipresse" />
+          <meta
+            property="twitter:url"
+            content={`https://www.afrikipresse.com/categorie/${category || ""}`}
+          />
+          <meta property="article:tag" content={activeCategoryMeta.keywords} />
+          <meta
+            property="article:section"
+            content={category || "Toutes les catégories"}
+          />
+          <meta
+            property="article:published_time"
+            content={new Date().toISOString()}
+          />
+          <meta property="article:author" content="Afrikipresse" />
+          <meta property="article:tag" content={activeCategoryMeta.keywords} />
+          <meta
+            property="article:section"
+            content={category || "Toutes les catégories"}
+          />
+          <meta name="robots" content="index, follow" />
+          <link
+            rel="canonical"
+            href={`https://www.afrikipresse.com/categorie/${category || ""}`}
+          />
         </Head>
 
-        <main>
+        <article>
           <div className="container mx-auto px-4">
             {/* Category Filter */}
             <div className="mb-6">
               <div className="flex flex-wrap gap-2">
-                {categories.map((categoryName) => (
-                  <Link
-                    key={categoryName}
-                    href={`/categorie?category=${encodeURIComponent(categoryName)}`}
-                    className={`px-3 py-1 rounded ${
-                      category === categoryName
-                        ? "bg-red-600 text-white text-3xl"
-                        : "bg-red-500 text-white hover:bg-red-800"
-                    }`}
-                  >
-                    {categoryName} • {totalPosts} articles
-                  </Link>
+                {categories.map((categoryName, index) => (
+                  <div key={index}>
+                    <div
+                      className={`px-3 py-1 rounded ${
+                        category === categoryName
+                          ? "bg-red-600 text-white text-3xl"
+                          : "bg-red-500 text-white text-3xl"
+                      }`}
+                    >
+                      Actualités {categoryName} • {totalPosts} articles
+                    </div>
+                    <p className="text-gray-600 text-lg">
+                      {activeCategoryMeta.description}
+                    </p>
+                  </div>
                 ))}
               </div>
             </div>
@@ -259,12 +381,14 @@ const PostsPage = ({
                     </p>
 
                     {/* Post Meta */}
-                    <div className="flex justify-between items-center text-sm text-gray-500">
-                      <span>
-                        {new Date(post.post_date).toLocaleDateString()}
-                      </span>
-                      <span>{post.categories.join(", ")}</span>
-                    </div>
+                    {isClient && (
+                      <div className="flex justify-between items-center text-sm text-gray-500">
+                        <span>
+                          {new Date(post.post_date).toLocaleDateString()}
+                        </span>
+                        <span>{post.categories.join(", ")}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -273,7 +397,7 @@ const PostsPage = ({
             {/* Pagination */}
             {totalPages > 1 && renderPagination()}
           </div>
-        </main>
+        </article>
       </Container>
     </Layout>
   );

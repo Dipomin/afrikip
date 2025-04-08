@@ -89,7 +89,7 @@ export default function Layout({ preview, children, user }) {
                 >
                   <div className="w-20 border-2">
                     <Image
-                      src={"https://www.afrikipresse.fr/journal-lia.png"}
+                      src={"/journal-lia.png"}
                       width={180}
                       height={117}
                       alt="L'intelligent d'Abidjan"
@@ -104,7 +104,7 @@ export default function Layout({ preview, children, user }) {
             <div className=" w-[150]">
               <Link href="/">
                 <Image
-                  src="https://www.afrikipresse.fr/images/afriki.png"
+                  src="/images/afriki.png"
                   width="300"
                   height="100"
                   alt="Afrikipresse"
@@ -190,7 +190,10 @@ export default function Layout({ preview, children, user }) {
                         </div>
                       </Link>
                     </div>
-                    <Button onClick={() => setRecherche(true)}>
+                    <Button
+                      variant={"outline"}
+                      onClick={() => setRecherche(true)}
+                    >
                       <Search size={36} />
                     </Button>
                   </div>

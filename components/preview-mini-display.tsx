@@ -1,5 +1,3 @@
-import Avatar from "./avatar";
-import Date from "./date";
 import CoverImage from "./cover-image";
 import Link from "next/link";
 
@@ -11,7 +9,7 @@ export default function PreviewMiniDisplay({ title, coverImage, slug }) {
           <CoverImage title={title} coverImage={coverImage} slug={slug} />
         )}
       </div>
-      <h3 className="text-[12px] font-semibold leading-snug">
+      <h3 className="text-[12px] font-semibold leading-snug line-clamp-3">
         <Link
           href={`/article/${slug}`}
           className="hover:underline"

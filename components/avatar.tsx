@@ -5,23 +5,13 @@ export default function Avatar({ author }) {
     author?.node?.firstName && author?.node?.lastName;
   const name = isAuthorHaveFullName
     ? `${author.node.firstName} ${author.node.lastName}`
-    : author.node.name || null;
+    : author.node?.name || null || "";
+
+  //console.log("AUTEUR", author.node.name);
 
   return (
     <div className="flex items-center">
-      {/* 
-      <div className="w-12 h-12 relative mr-4">
-
-        <Image
-          src={author.node.avatar.url}
-          layout="fill"
-          className="rounded-full"
-          alt={name}
-        />
-      </div>
-      */}
-
-      <div>{name}</div>
+      <div>{author.node?.name}</div>
     </div>
   );
 }

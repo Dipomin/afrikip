@@ -1,32 +1,18 @@
 import { useRouter } from "next/router";
 import ErrorPage from "next/error";
 import { GetStaticPaths, GetStaticProps } from "next";
-import { useEffect, useState } from "react";
-import { useUser } from "@supabase/auth-helpers-react";
-import { createClient } from "@supabase/supabase-js";
-import { Analytics } from "@vercel/analytics/react";
+import { Loader2, Timer } from "lucide-react";
+import readingTime from "reading-time";
+import React, { useEffect, useState } from "react";
+import { FacebookProvider } from "react-facebook";
 import he from "he";
 import striptags from "striptags";
-import readingTime from "reading-time";
-import { Timer } from "lucide-react";
-import { FacebookProvider } from "react-facebook";
+import dynamic from "next/dynamic";
 
-// Components
-import Layout from "../../components/layout";
 import Container from "../../components/container";
 import PostBody from "../../components/post-body";
 import PostHeader from "../../components/post-header";
-import SectionSeparator from "../../components/section-separator";
-import Tags from "../../components/tags";
-import Avatar from "../../components/avatar";
-import Date from "../../components/date";
-import AdBanner from "../../components/ab-banner";
-import { Meta } from "../../components/meta";
-import RelatedPosts from "../../components/related-posts";
-import FacebookComment from "../../components/facebook-comment";
-import MoreCategorie from "../../components/more-categorie";
-
-// Utils & Constants
+import Layout from "../../components/layout";
 import {
   getAllPostsWithSlug,
   getCategorieDetails,
@@ -35,228 +21,336 @@ import {
   getPostList,
 } from "../../lib/api";
 import { URL_ARTICLE } from "../../lib/constants";
-import { Database } from "../../types_db";
-import SocialShareButtons from "../../components/social-share-buttons";
+import Avatar from "../../components/avatar";
+import Date from "../../components/date";
+import MoreCategorie from "../../components/more-categorie";
+import { useUser } from "@supabase/auth-helpers-react";
 
-// Types
-interface PostProps {
-  post: any;
-  posts: any;
-  preview: boolean;
-  relatedPosts: any[];
-  categoriePosts: any;
-  categorieDetails: any;
+import { createClient } from "@supabase/supabase-js";
+import { Database } from "../../types_db";
+import AdBanner from "../../components/ab-banner";
+import { Meta } from "../../components/meta";
+
+export const revalidate = 3600;
+
+const postBody = dynamic(() => import("../../components/post-body"), {
+  ssr: false,
+});
+
+const SocialShareButtons = dynamic(
+  () => import("../../components/social-share-buttons"),
+  {
+    ssr: false,
+  }
+);
+
+const FacebookComment = dynamic(
+  () => import("../../components/facebook-comment"),
+  {
+    ssr: false,
+  }
+);
+
+const RelatedPosts = dynamic(() => import("../../components/related-posts"), {
+  ssr: false,
+});
+
+type Article = {
+  slug: string;
+  title: string;
+  excerpt: string;
+  date: string;
+  categories: { nodes: { slug: string }[] };
+};
+
+interface Post {
+  title: string;
+  content: string;
+  slug: string;
+  excerpt: string;
+  tags: string;
+  date: string;
+  author: string;
+  featuredImage: {
+    url: string;
+    alt: string;
+  } | null;
+  categories: Array<{
+    name: string;
+    slug: string;
+  }>;
 }
 
-const Post: React.FC<PostProps> = ({
-  post,
-  posts,
-  preview,
-  relatedPosts,
-  categoriePosts,
-  categorieDetails,
-}) => {
+type PostListResponse =
+  | Article[]
+  | { nodes: Article[]; endCursor: string | null };
+
+const Post = ({ post, preview = true, relatedPosts }) => {
   const router = useRouter();
+  const [article, setArticle] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const [statusMobileAbonne, setStatusMobileAbonne] = useState<
+    string | undefined | null
+  >(null);
+  const [statusAbonne, setStatusAbonne] = useState<string | undefined | null>(
+    null
+  );
+  const url = `https://www.afrikipresse.fr/article/${post?.slug}` || "";
+  const statRead = readingTime(article);
+
+  useEffect(() => {
+    if (post?.content) {
+      setArticle(post.content);
+      setIsLoading(false);
+    }
+    setIsLoading(true);
+  }, [post]);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const user = useUser();
   const userId = user?.id;
 
-  // States
-  const [article, setArticle] = useState<string>(post.content);
-  const [statusAbonne, setStatusAbonne] = useState<string | null>(null);
-  const [catPosts, setCatPosts] = useState(categoriePosts);
-  const [isMounted, setIsMounted] = useState(false);
-
-  // Initialize Supabase client
   const supabase = createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL || "",
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
   );
 
-  // Reading time calculation
-  const readingStats = readingTime(article);
-  const readingMinutes = Math.round(readingStats.minutes);
-
-  // URL and metadata preparation
-  const url = `https://www.afrikipresse.fr/article/${post.slug}`;
-  const ogUrl = URL_ARTICLE + post?.slug;
-  const urlImage = post.featuredImage?.node?.sourceUrl;
-  const postExcerpt = he.decode(striptags(post.excerpt.slice(0, 200)));
-  const postTags = post?.tags?.edges?.map(({ node }: any) => node?.name) || [];
-  const articleCat = post.categories.edges.map(
-    (category: any) => category.node.name
-  );
-
   useEffect(() => {
-    setIsMounted(true);
-    
-    // Prevent copy-paste
-    const preventCopyPaste = (e: Event) => {
-      e.preventDefault();
-      return false;
+    const fetchSubscriptionStatus = async () => {
+      if (user) {
+        const { data, error } = await supabase
+          .from("mobilepayment")
+          .select("statut_abonnement")
+          .eq("user_foreign_key", user.id);
+
+        if (error) {
+          console.error(
+            "Erreur lors de la récupération du statut d'abonnement:",
+            error.message
+          );
+          return;
+        }
+
+        setStatusMobileAbonne((data as any)[0]?.statut_abonnement as string);
+        console.log(
+          "Fetch mobile payment data:",
+          (data as any)[0]?.statut_abonnement as string
+        );
+      }
     };
 
+    fetchSubscriptionStatus();
+  }, [user, supabase]);
+
+  useEffect(() => {
+    const preventCopyPaste = (e: any) => {
+      e.preventDefault();
+    };
+
+    document.documentElement.addEventListener("cut", preventCopyPaste);
     document.documentElement.addEventListener("copy", preventCopyPaste);
     document.documentElement.addEventListener("paste", preventCopyPaste);
     document.documentElement.addEventListener("contextmenu", preventCopyPaste);
-
     return () => {
+      document.documentElement.removeEventListener("cut", preventCopyPaste);
       document.documentElement.removeEventListener("copy", preventCopyPaste);
       document.documentElement.removeEventListener("paste", preventCopyPaste);
-      document.documentElement.removeEventListener("contextmenu", preventCopyPaste);
+      document.documentElement.addEventListener(
+        "contextmenu",
+        preventCopyPaste
+      );
     };
   }, []);
 
   useEffect(() => {
-    const checkSubscriptionStatus = async (userId: string) => {
-      if (!userId) return;
+    async function checkSubscriptionStatut(userId: any) {
+      if (!userId) {
+        console.error("ID utilisateur non défini");
+        return;
+      }
 
-      try {
-        const { data: userData, error: userError } = await supabase
-          .from("users")
-          .select("id")
-          .eq("id", userId)
-          .single();
+      const { data, error } = await supabase
+        .from("users")
+        .select("id")
+        .eq("id", userId)
+        .single();
 
-        if (userError || !userData) {
-          console.error("User verification failed:", userError);
-          return;
-        }
+      if (error) {
+        console.error("Erreur lors de la récupération de l'utilisateur", error);
+        return;
+      }
 
-        const { data: subscriptionData, error: subscriptionError } = await supabase
+      if (!data) {
+        console.error("Utilisateur non abonné");
+        return;
+      }
+
+      const { data: subscriptionData, error: subscriptionError } =
+        await supabase
           .from("subscriptions")
           .select("status")
           .eq("user_id", userId)
           .single();
 
-        if (subscriptionError) {
-          console.error("Subscription check failed:", subscriptionError);
-          return;
-        }
-
-        setStatusAbonne(subscriptionData?.status || "Pas d'abonnement actif");
-      } catch (error) {
-        console.error("Subscription check error:", error);
+      if (subscriptionError) {
+        console.error(
+          "Erreur lors de la récupération du statut de la souscription stripe:",
+          subscriptionError
+        );
+        return;
       }
-    };
 
-    if (userId) checkSubscriptionStatus(userId);
+      if (subscriptionData) {
+        const subscriptionStatus = subscriptionData.status;
+        console.log(`L'abonnement de l'utilisateur est: ${subscriptionStatus}`);
+        setStatusAbonne(subscriptionStatus);
+      } else {
+        console.log(`L'utilisateur n'a pas d'abonnement actif.`);
+        setStatusAbonne("Pas d'abonnement actif");
+      }
+    }
+
+    checkSubscriptionStatut(userId);
   }, [userId, supabase]);
 
-  if (!router.isFallback && !post?.slug) {
-    return <ErrorPage statusCode={404} />;
+  if (router.isFallback) {
+    return (
+      <div className="flex justify-center items-center h-screen w-screen">
+        <Loader2 className="w-8 h-8 animate-spin" />
+        Chargement...
+      </div>
+    );
   }
 
-  const filteredPosts = Array.isArray(catPosts)
-    ? catPosts.filter((catPost) =>
-        catPost.categories.nodes.some(
-          (node: any) => node.slug === categorieDetails?.slug
-        )
-      )
-    : [];
+  const ogUrl = URL_ARTICLE + post?.slug;
+  const urlImage = post.featuredImage?.url;
+
+  //console.log("INFO AUTEUR", post.author);
+
+  const postTags: Array<{ node: { name: string } }> = post.tags.map(
+    ({ node }) => node
+  );
+
+  const postExcerpt = he.decode(striptags(post.excerpt.slice(0, 200)));
+  const publishedTime = post.date;
+  const postTitle = post.title;
+  const articleAuthor =
+    post.author?.node?.firstName && post.author?.node?.lastName;
+  const articleSection = post.category;
+  const articleCat = post.categories[0]?.name || "";
+
+  const datePublication = publishedTime.slice(0, 10);
+
+  const toReplace = "https://afrikipresse.fr";
+  const newAdress = "https://www.afrikipresse.fr/article";
 
   return (
     <>
       <Meta
-        postTitle={post.title}
+        postTitle={postTitle}
         ogImage={urlImage}
         postExcerptDecoded={postExcerpt}
         postTags={postTags}
         ogUrl={ogUrl}
-        publishedTime={post.date}
-        articleAuthor={`${post.author?.node?.firstName} ${post.author?.node?.lastName}`}
+        publishedTime={publishedTime}
+        articleAuthor={articleAuthor}
         articleSection={articleCat}
       />
-      
       <Layout preview={preview} user={userId}>
         <Container>
-          <Analytics />
-          <article className="max-w-4xl mx-auto">
-            <div className="lg:mx-10">
-              <PostHeader
-                title={post.title}
-                coverImage={post.featuredImage}
-                date={post.date}
-                author={post.author}
-                categories={post.categories}
-              />
-            </div>
-
-            <div className="flex flex-col space-y-4 lg:space-y-6">
-              {/* Article Meta Information */}
-              <div className="flex flex-wrap items-center gap-2 text-sm lg:text-base">
-                <span>Publié le</span>
-                <Date dateString={post.date} />
-                <span>•</span>
-                <span>Par</span>
-                <Avatar author={post.author} />
-                <span>•</span>
-                <div className="flex items-center">
-                  <Timer className="w-4 h-4 mr-1" />
-                  <span>Lecture {readingMinutes} minutes</span>
-                </div>
-              </div>
-
-              {/* Social Share Buttons */}
-              <SocialShareButtons url={ogUrl} title={post.title} />
-
-              {/* Main Content */}
-              <div className="grid grid-cols-1 lg:grid-cols-[2fr,1fr] gap-8">
+          <article>
+            <div className="grid grid-cols-1 lg:flex">
+              <div className="lg:max-w-[1200px]">
                 <div>
-                  <PostBody
-                    content={article.replace(
-                      "https://afrikipresse.fr",
-                      "https://www.afrikipresse.fr/article"
-                    )}
-                  />
-                  
-                  {/* Facebook Comments */}
-                  <div className="mt-10">
-                    <h3 className="text-xl font-semibold mb-4">
-                      Réagir à l&apos;article
-                    </h3>
-                    <FacebookProvider
-                      appId={process.env.FACEBOOK_APP_ID || ""}
-                    >
-                      <FacebookComment
-                        appId={process.env.FACEBOOK_APP_ID}
-                        url={url}
-                      />
-                    </FacebookProvider>
+                  <div className="lg:mx-10">
+                    <PostHeader
+                      title={post.title}
+                      coverImage={
+                        post.featuredImage?.url ||
+                        "https://www.afrikipresse.fr/default.png"
+                      }
+                      date={post.date}
+                      author={post.author}
+                      categories={post.categories}
+                    />
+                  </div>
+                  <div className="flex lg:space-x-2">
+                    <div className="flex md:block md:mb-6 ">
+                      <div className="flex items-center lg:space-x-2 text-xs lg:text-[14px]">
+                        <div>Publié le</div>
+                        <Date dateString={post.date} /> <div>•</div>{" "}
+                        <div>Par</div>
+                        <Avatar author={post.author} />
+                        <div>•</div>
+                        <div className="hidden lg:flex">
+                          <div className="flex items-center">
+                            <Timer className="w-4 h-4 mr-1" />{" "}
+                            <span>
+                              {Math.round(statRead.minutes)} min de lecture
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="lg:hidden text-xs">
+                    <div className="flex pt-3">
+                      <div>
+                        <Timer className="w-4 h-4 mr-1" />{" "}
+                      </div>
+                      <div>{Math.round(statRead.minutes)} min de lecture</div>
+                    </div>
+                  </div>
+                  <div className="flex lg:space-x-2 pt-5 lg:pt-2">
+                    <SocialShareButtons url={url} title={post.title} />
+                  </div>
+
+                  <div>
+                    {
+                      <div className="grid grid-cols-1 lg:flex">
+                        <div>
+                          {isClient && article && (
+                            <div className="mt-10">
+                              <PostBody content={article} />
+                            </div>
+                          )}
+
+                          <div className="pt-10">
+                            Réagir à l&apos;article
+                            <FacebookProvider
+                              appId={process.env.FACEBOOK_APP_ID || ""}
+                            >
+                              <FacebookComment
+                                appId={process.env.FACEBOOK_APP_ID}
+                                url={url}
+                              />
+                            </FacebookProvider>
+                          </div>
+                        </div>
+                        <div className="w-full lg:min-w-[300px] bg-slate-100/50 p-4">
+                          <h2 className="mb-8 text-base md:text-2xl font-bold tracking-tighter leading-tight">
+                            Publiés récemment
+                          </h2>
+
+                          {relatedPosts.length > 0 && (
+                            <MoreCategorie posts={relatedPosts} />
+                          )}
+                        </div>
+                      </div>
+                    }
+                  </div>
+                  <div>
+                    <AdBanner
+                      data-ad-slot="2499770324"
+                      data-ad-format="auto"
+                      data-full-width-responsive="true"
+                    />
                   </div>
                 </div>
-
-                {/* Sidebar */}
-                <aside className="bg-slate-100/50 p-4 rounded-lg">
-                  <h2 className="text-xl font-bold mb-6">
-                    Publiés récemment
-                  </h2>
-                  {relatedPosts.length > 0 && (
-                    <MoreCategorie posts={relatedPosts} />
-                  )}
-                </aside>
-              </div>
-
-              {/* Advertisement */}
-              <AdBanner
-                data-ad-slot="2499770324"
-                data-ad-format="auto"
-                data-full-width-responsive="true"
-              />
-
-              {/* Tags */}
-              <footer>
-                {post.tags.edges.length > 0 && <Tags tags={post.tags} />}
-              </footer>
-
-              {/* Related Posts */}
-              <SectionSeparator />
-              <div className="max-w-sm p-4">
-                <h2 className="text-2xl font-bold mb-6">
-                  À lire aussi
-                </h2>
-                {filteredPosts.length > 0 && (
-                  <RelatedPosts posts={filteredPosts} />
-                )}
               </div>
             </div>
           </article>
@@ -266,53 +360,84 @@ const Post: React.FC<PostProps> = ({
   );
 };
 
+export default Post;
+
 export const getStaticProps: GetStaticProps = async ({
   params,
   preview = false,
-  previewData,
 }) => {
-  try {
-    const categoriePosts = params?.categoryName
-      ? await getPostList(null, undefined)
-      : await getPostList(null, null);
-
-    const categorieDetails = await getCategorieDetails(params?.categoryName);
-    const data = await getPostAndMorePosts(params?.slug, preview, previewData);
-
-    return {
-      props: {
-        preview,
-        post: data.post,
-        posts: data.posts,
-        categoriePosts,
-        relatedPosts: data.posts.edges,
-        categorieDetails,
-      },
-    };
-  } catch (error) {
-    console.error("Error in getStaticProps:", error);
+  if (!params?.slug) {
     return {
       notFound: true,
     };
+  }
+
+  try {
+    const data = await getPostAndMorePosts(
+      params?.slug as string,
+      preview,
+      null
+    );
+
+    //console.log("DATA POST TAGS AND MORE POSTS", data.post);
+    //console.log("AUTHOR DATA", data.post.author.node?.name);
+
+    const post: Post = {
+      content: data.post.content || "",
+      excerpt: data.post.excerpt || "",
+      title: data.post.title || "",
+      slug: data.post.slug || "",
+      date: data.post.date || "",
+      author: data.post.author.node?.name || "",
+      tags: data.post.tags.edges || "",
+      featuredImage: data.post.featuredImage
+        ? {
+            url: data.post.featuredImage.node?.sourceUrl || "",
+            alt: data.post.featuredImage.node?.altText || "",
+          }
+        : null,
+      categories:
+        data.post.categories?.edges?.map((edge) => ({
+          name: edge.node.name || "",
+          slug: edge.node.slug || "",
+        })) || [],
+    };
+
+    //console.log("SLUG SLUG", data.post.slug);
+
+    if (!post.slug) {
+      console.log("Post is missing", post);
+      return { notFound: true };
+    }
+
+    return {
+      props: {
+        preview: preview || false,
+        post,
+        posts: data.posts || null,
+        relatedPosts: data.posts?.edges || [],
+      },
+      revalidate: 3600,
+    };
+  } catch (error) {
+    console.log("Error fetching posts:", error);
+    return { notFound: true };
   }
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
     const allPosts = await getAllPostsWithSlug();
-    await getCategorySlugs(); // Fetch categories for future use
 
     return {
-      paths: allPosts.edges.map(({ node }) => `/article/${node.slug}`) || [],
-      fallback: "blocking",
+      paths: allPosts.edges?.map(({ node }) => `/article/${node.slug}`) || [],
+      fallback: true,
     };
   } catch (error) {
-    console.error("Error in getStaticPaths:", error);
+    console.error("Error fetching posts:", error);
     return {
       paths: [],
-      fallback: "blocking",
+      fallback: false,
     };
   }
 };
-
-export default Post;

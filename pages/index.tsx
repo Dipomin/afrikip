@@ -4,7 +4,6 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { useEffect, useState } from "react";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/fr.json";
-import Image from "next/image";
 
 import {
   getAllPostsForHome,
@@ -210,9 +209,9 @@ export default function Index({ allPosts: { edges }, preview }) {
 
   const user = useUser();
 
-  const postTitle = "Afrikipresse";
+  const postTitle = "Toutes les actualités | Afrikipresse";
   const postExcerptDecoded =
-    "Suivez toute l'actualité africaine et dans le monde";
+    "Afrikipresse couvre toutes les actualités d'Afrique, avec des reportages et des décryptages sur les événements du continent.";
   const postImage = "https://www.afrikipresse.com/default.png";
   const postAuthor = "Afrikipresse";
   const postTag = "Afrikipresse";
@@ -240,16 +239,26 @@ export default function Index({ allPosts: { edges }, preview }) {
           {heroPost && (
             <HeroPost
               title={heroPost.title}
-              coverImage={heroPost.featuredImage}
+              coverImage={
+                heroPost.featuredImage || {
+                  node: {
+                    sourceUrl: "https://www.afrikipresse.fr/default.png",
+                    mediaDetails: {
+                      width: 1500,
+                      height: 800,
+                    },
+                  },
+                }
+              }
               author={heroPost.author}
               date={heroPost.date}
               slug={heroPost.slug}
               excerpt={heroPost.excerpt}
             />
           )}
-          
-          <div className="grid grid-cols-1 lg:flex py-8 lg:border-b-[1px]">
-            <div className="border-b-0 lg:mx-4">
+
+          <div className="grid grid-cols-1 lg:flex py-8">
+            <div className="lg:mx-4">
               {newsTwo && (
                 <HomeNews2
                   title={newsTwo.title}
@@ -259,7 +268,7 @@ export default function Index({ allPosts: { edges }, preview }) {
                 />
               )}
             </div>
-            <div className="border-b-0 lg:border-l-[1px] py-2 ">
+            <div className="py-2 ">
               {newsTwo && (
                 <HomeNews2
                   title={newsThree.title}
@@ -274,7 +283,7 @@ export default function Index({ allPosts: { edges }, preview }) {
             </div>
           </div>
 
-          <div className="grid lg:border-b-[1px]">
+          <div className="grid grid-cols-1 lg:flex py-8">
             {newsFive.length && <HomeFive posts={newsFive} />}
           </div>
 
@@ -464,6 +473,7 @@ export const getStaticProps: GetStaticProps = async ({
   const economieLastPosts = await getEconomiePosts();
 
   return {
+    revalidate: 3600,
     props: { allPosts, preview, politiqueLastPosts, economieLastPosts },
   };
 };
