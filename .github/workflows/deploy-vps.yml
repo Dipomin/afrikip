@@ -1,0 +1,164 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+      - production
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18.x'
+  APP_NAME: 'afrikipresse'
+  APP_PORT: 3001  # Port spécifique pour cette app (3000, 3001, 3002, etc.)
+
+jobs:
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Create .env file
+        run: |
+          cat > .env.production << EOF
+          # WordPress
+          WORDPRESS_API_URL=${{ secrets.WORDPRESS_API_URL }}
+          WORDPRESS_AUTH_REFRESH_TOKEN=${{ secrets.WORDPRESS_AUTH_REFRESH_TOKEN }}
+          
+          # Database
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          
+          # Firebase
+          NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+          NEXT_PUBLIC_FIREBASE_APP_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+          NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID }}
+          
+          # Supabase
+          NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          
+          # Stripe
+          STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+          STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          
+          # CinetPay
+          CINETPAY_KEY=${{ secrets.CINETPAY_KEY }}
+          CINETPAY_SITE_ID=${{ secrets.CINETPAY_SITE_ID }}
+          
+          # Analytics
+          NEXT_PUBLIC_GA_MEASUREMENT_ID=${{ secrets.NEXT_PUBLIC_GA_MEASUREMENT_ID }}
+          
+          # App Config
+          NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          NODE_ENV=production
+          PORT=${{ env.APP_PORT }}
+          EOF
+          
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+        
+      - name: Generate Prisma Client
+        run: npx prisma generate
+        
+      - name: Build application
+        run: npm run build
+        env:
+          NODE_ENV: production
+          
+      - name: Create deployment package
+        run: |
+          tar -czf deployment.tar.gz \
+            .next \
+            public \
+            package.json \
+            package-lock.json \
+            next.config.js \
+            .env.production \
+            prisma \
+            node_modules
+            
+      - name: Deploy to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_SSH_PORT || 22 }}
+          source: "deployment.tar.gz"
+          target: "/tmp/"
+          
+      - name: Execute deployment script on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_SSH_PORT || 22 }}
+          script: |
+            # Configuration
+            APP_NAME="${{ env.APP_NAME }}"
+            APP_PORT=${{ env.APP_PORT }}
+            APP_DIR="/var/www/$APP_NAME"
+            DEPLOY_USER="${{ secrets.VPS_USERNAME }}"
+            
+            echo "🚀 Starting deployment for $APP_NAME on port $APP_PORT"
+            
+            # Créer le répertoire de l'application si nécessaire
+            sudo mkdir -p $APP_DIR
+            sudo chown -R $DEPLOY_USER:$DEPLOY_USER $APP_DIR
+            
+            # Extraire le package de déploiement
+            cd $APP_DIR
+            tar -xzf /tmp/deployment.tar.gz
+            rm /tmp/deployment.tar.gz
+            
+            # Copier les variables d'environnement
+            cp .env.production .env.local
+            
+            # Installer PM2 si nécessaire
+            if ! command -v pm2 &> /dev/null; then
+              echo "📦 Installing PM2..."
+              sudo npm install -g pm2
+            fi
+            
+            # Arrêter l'ancienne instance si elle existe
+            pm2 delete $APP_NAME 2>/dev/null || true
+            
+            # Démarrer l'application avec PM2
+            pm2 start npm --name "$APP_NAME" -- start
+            pm2 save
+            
+            # Configurer PM2 pour démarrer au boot
+            sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u $DEPLOY_USER --hp /home/$DEPLOY_USER
+            
+            echo "✅ Deployment completed successfully!"
+            pm2 status
+            
+      - name: Health check
+        run: |
+          sleep 10
+          curl -f ${{ secrets.NEXT_PUBLIC_SITE_URL }} || exit 1
+          
+      - name: Notify deployment status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Deployment successful!"
+          else
+            echo "❌ Deployment failed!"
+          fi
