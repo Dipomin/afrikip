@@ -1,52 +1,16 @@
-import React, { useEffect, useState } from "react";
-
-// Force dynamic rendering - Firebase data cannot be prerendered
-export const dynamic = "force-dynamic";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
-
-// Force dynamic rendering - Firebase data cannot be prerendered
-export const dynamic = "force-dynamic";
-import { db, auth } from "../../../firebase";
-
-// Force dynamic rendering - Firebase data cannot be prerendered
-export const dynamic = "force-dynamic";
-import { onAuthStateChanged, User } from "firebase/auth";
-
-// Force dynamic rendering - Firebase data cannot be prerendered
-export const dynamic = "force-dynamic";
-import { useRouter } from "next/router";
-
-// Force dynamic rendering - Firebase data cannot be prerendered
-export const dynamic = "force-dynamic";
-import ModernJournalUpload from "../../../components/ModernJournalUpload";
-
-// Force dynamic rendering - Firebase data cannot be prerendered
-export const dynamic = "force-dynamic";
-import UserHeader from "../../../components/UserHeader";
-
-// Force dynamic rendering - Firebase data cannot be prerendered
-export const dynamic = "force-dynamic";
-import { FileType } from "../../../typings";
-
-// Force dynamic rendering - Firebase data cannot be prerendered
-export const dynamic = "force-dynamic";
-import { GetServerSideProps } from "next";
-
-// Force dynamic rendering - Firebase data cannot be prerendered
-export const dynamic = "force-dynamic";
-import TableWrapper from "../../../components/admin-journal/table/TableWrapper";
-
-// Force dynamic rendering - Firebase data cannot be prerendered
-export const dynamic = "force-dynamic";
 import Layout from "../../../components/layout";
-
-// Force dynamic rendering - Firebase data cannot be prerendered
-export const dynamic = "force-dynamic";
-import { Loader2, Shield, AlertCircle } from "lucide-react";
-
-// Force dynamic rendering - Firebase data cannot be prerendered
-export const dynamic = "force-dynamic";
+import ModernJournalUpload from "../../../components/ModernJournalUpload";
+import React, { useEffect, useState } from "react";
+import TableWrapper from "../../../components/admin-journal/table/TableWrapper";
+import UserHeader from "../../../components/UserHeader";
 import toast from "react-hot-toast";
+import { FileType } from "../../../typings";
+import { GetServerSideProps } from "next";
+import { Loader2, Shield, AlertCircle } from "lucide-react";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { db, auth } from "../../../firebase";
+import { onAuthStateChanged, User } from "firebase/auth";
+import { useRouter } from "next/router";
 
 // Force dynamic rendering - Firebase data cannot be prerendered
 export const dynamic = "force-dynamic";

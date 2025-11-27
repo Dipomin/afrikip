@@ -1,41 +1,13 @@
-import { db } from "../../../../../firebase";
-
-// Force dynamic rendering - Firebase data cannot be prerendered
-export const dynamic = "force-dynamic";
-import { FileType } from "../../../../../typings";
-
-// Force dynamic rendering - Firebase data cannot be prerendered
-export const dynamic = "force-dynamic";
-import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
-
-// Force dynamic rendering - Firebase data cannot be prerendered
-export const dynamic = "force-dynamic";
-import React, { useEffect, useState } from "react";
-
-// Force dynamic rendering - Firebase data cannot be prerendered
-export const dynamic = "force-dynamic";
-
-import Link from "next/link";
-
-// Force dynamic rendering - Firebase data cannot be prerendered
-export const dynamic = "force-dynamic";
-import { Button } from "../../../../../components/admin-journal/ui/button";
-
-// Force dynamic rendering - Firebase data cannot be prerendered
-export const dynamic = "force-dynamic";
-import TableWrapperUser from "./TableWrapperUser";
-
-// Force dynamic rendering - Firebase data cannot be prerendered
-export const dynamic = "force-dynamic";
-import { ArrowRight, StopCircleIcon } from "lucide-react";
-
-// Force dynamic rendering - Firebase data cannot be prerendered
-export const dynamic = "force-dynamic";
 import ArchivesAnnees from "../../../../../components/archives-annees";
-
-// Force dynamic rendering - Firebase data cannot be prerendered
-export const dynamic = "force-dynamic";
 import Image from "next/image";
+import Link from "next/link";
+import React, { useEffect, useState } from "react";
+import TableWrapperUser from "./TableWrapperUser";
+import { ArrowRight, StopCircleIcon } from "lucide-react";
+import { Button } from "../../../../../components/admin-journal/ui/button";
+import { FileType } from "../../../../../typings";
+import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
+import { db } from "../../../../../firebase";
 
 // Force dynamic rendering - Firebase data cannot be prerendered
 export const dynamic = "force-dynamic";
