@@ -1,5 +1,5 @@
 import ArchivesAnnees from "../../../../../components/archives-annees";
-import TableWrapperUser from "./_TableWrapperUser";
+import TableWrapperUser from "../../../../../components/admin-journal/table/TableWrapperUser_2020";
 import { FileType } from "../../../../../typings";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../../../../firebase";
