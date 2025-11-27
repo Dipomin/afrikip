@@ -1,14 +1,41 @@
 "use client";
 
 import { FileType } from "../../../../../typings";
+
+// Force dynamic rendering - Firebase data cannot be prerendered
+export const dynamic = "force-dynamic";
 import React, { useEffect, useState } from "react";
+
+// Force dynamic rendering - Firebase data cannot be prerendered
+export const dynamic = "force-dynamic";
 import { Button } from "../../../../../components/admin-journal/ui/button";
+
+// Force dynamic rendering - Firebase data cannot be prerendered
+export const dynamic = "force-dynamic";
 import { columns } from "../../../../../components/admin-journal/table/columns";
+
+// Force dynamic rendering - Firebase data cannot be prerendered
+export const dynamic = "force-dynamic";
 import { useCollection } from "react-firebase-hooks/firestore";
+
+// Force dynamic rendering - Firebase data cannot be prerendered
+export const dynamic = "force-dynamic";
 import { query, collection, orderBy } from "firebase/firestore";
+
+// Force dynamic rendering - Firebase data cannot be prerendered
+export const dynamic = "force-dynamic";
 import { db } from "../../../../../firebase";
+
+// Force dynamic rendering - Firebase data cannot be prerendered
+export const dynamic = "force-dynamic";
 import { Skeleton } from "../../../../../components/admin-journal/ui/skeleton";
+
+// Force dynamic rendering - Firebase data cannot be prerendered
+export const dynamic = "force-dynamic";
 import { DataTableUser } from "../../../../../components/admin-journal/table/TableUser";
+
+// Force dynamic rendering - Firebase data cannot be prerendered
+export const dynamic = "force-dynamic";
 
 function TableWrapper({ skeletonFiles }: { skeletonFiles: FileType[] }) {
   //const user = useUser();

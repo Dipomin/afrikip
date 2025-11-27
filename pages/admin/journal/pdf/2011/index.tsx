@@ -1,10 +1,28 @@
 import { db } from "../../../../../firebase";
+
+// Force dynamic rendering - Firebase data cannot be prerendered
+export const dynamic = "force-dynamic";
 import { FileType } from "../../../../../typings";
+
+// Force dynamic rendering - Firebase data cannot be prerendered
+export const dynamic = "force-dynamic";
 import { collection, getDocs } from "firebase/firestore";
+
+// Force dynamic rendering - Firebase data cannot be prerendered
+export const dynamic = "force-dynamic";
 import React from "react";
 
+// Force dynamic rendering - Firebase data cannot be prerendered
+export const dynamic = "force-dynamic";
+
 import TableWrapperUser from "./TableWrapperUser";
+
+// Force dynamic rendering - Firebase data cannot be prerendered
+export const dynamic = "force-dynamic";
 import ArchivesAnnees from "../../../../../components/archives-annees";
+
+// Force dynamic rendering - Firebase data cannot be prerendered
+export const dynamic = "force-dynamic";
 
 async function Dashboard() {
   //const userId = user?.id;
