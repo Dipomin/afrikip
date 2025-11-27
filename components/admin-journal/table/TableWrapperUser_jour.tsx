@@ -8,7 +8,7 @@ import { Skeleton } from "../ui/skeleton";
 import { columns } from "../table/columns";
 import { db } from "../../../firebase";
 import { query, collection, orderBy, limit } from "firebase/firestore";
-import { useAuth } from "../../../../../hooks/useAuth";
+import { useAuth } from "../../../hooks/useAuth";
 import { useCollection } from "react-firebase-hooks/firestore";
 
 // Force dynamic rendering - Firebase data cannot be prerendered
