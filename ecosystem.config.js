@@ -26,7 +26,7 @@ module.exports = {
       instance_var: 'INSTANCE_ID',
       // Gestion des signaux
       kill_timeout: 5000,
-      wait_ready: true,
+      wait_ready: false, // Désactivé car Next.js n'envoie pas de signal ready
       listen_timeout: 10000
     }
   ],

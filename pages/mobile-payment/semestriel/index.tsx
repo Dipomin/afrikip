@@ -26,7 +26,6 @@ const PaiementSemestriel = () => {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
-
   const randomCustomerId = Math.floor(Math.random() * 100000000).toString();
   const randomTransactionId = Math.floor(Math.random() * 100000000).toString();
 
@@ -65,27 +64,27 @@ const PaiementSemestriel = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-        try {
-          const response: AxiosResponse<ApiResponse> = await axios.post(
-            "/api/cinetpay-s",
-            formData
-          );
-          console.log("Complete API response", response);
+      try {
+        const response: AxiosResponse<ApiResponse> = await axios.post(
+          "/api/cinetpay-s",
+          formData
+        );
+        console.log("Complete API response", response);
 
-          if (response.data && response.data.payment_url) {
-            const payment_url = response.data.payment_url;
+        if (response.data && response.data.payment_url) {
+          const payment_url = response.data.payment_url;
 
-            if (payment_url) {
-              router.push(payment_url);
-            } else {
-              console.error("Payment url not available");
-            }
+          if (payment_url) {
+            router.push(payment_url);
           } else {
-            console.error("Unexpected API response format", response.data);
+            console.error("Payment url not available");
           }
-        } catch (error) {
-          console.error(error);
+        } else {
+          console.error("Unexpected API response format", response.data);
         }
+      } catch (error) {
+        console.error(error);
+      }
     } catch (error) {
       console.error("Erreur lors de l'insertion des données :", error);
     }
