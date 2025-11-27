@@ -5,9 +5,9 @@ import Layout from "../../components/layout";
 
 import Container from "../../components/container";
 
-const CGU = ({ preview }) => {
+const CGU = () => {
   return (
-    <Layout preview={preview}>
+    <Layout>
       <Container>
         <div>
           <div className="text-2xl lg:text-4xl font-black text-center p-10 text-black">

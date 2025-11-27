@@ -80,7 +80,7 @@ const UploadPDFForm: React.FC = () => {
   };
 
   return (
-    <Layout preview={""}>
+    <Layout>
       <div className="max-w-md mx-auto mt-10 p-4 border rounded-md shadow-md">
         <h2 className="text-2xl font-bold mb-4">
           Mise en ligne L&apos;intelligent en PDF

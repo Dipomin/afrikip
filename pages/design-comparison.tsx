@@ -64,7 +64,7 @@ export default function DesignComparison({ preview = false }) {
         articleSection=""
       />
       
-      <Layout preview={preview}>
+      <Layout>
         <Container>
           <div className="py-8">
             {/* Header */}

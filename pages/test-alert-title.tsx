@@ -11,7 +11,7 @@ import { Meta } from "../components/meta";
  * Page de test pour démontrer les améliorations du composant AlertTitle
  * Cette page peut être supprimée en production
  */
-export default function TestAlertTitle({ preview = false }) {
+export default function TestAlertTitle() {
   // Données de test pour AlertLast
   const testPosts = [
     {
@@ -87,7 +87,7 @@ export default function TestAlertTitle({ preview = false }) {
         articleSection=""
       />
 
-      <Layout preview={preview}>
+      <Layout>
         {/* Barre d'alertes en action */}
         <AlertLast posts={testPosts} />
 

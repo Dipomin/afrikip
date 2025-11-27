@@ -299,7 +299,7 @@ const PostsPage = ({
       };
 
   return (
-    <Layout preview={""} user={""}>
+    <Layout>
       <Container>
         <Head>
           <title>{activeCategoryMeta.title}</title>

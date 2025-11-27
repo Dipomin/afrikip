@@ -65,14 +65,13 @@ interface YearData {
 
 const ArticlesByYear = (
   { articlesByYear }: { articlesByYear: YearData },
-  preview
 ) => {
   const [displayedArticles, setDisplayedArticles] = useState(20);
 
   const route = useRouter();
 
   return (
-    <Layout preview={preview}>
+    <Layout>
       <Container>
         <div>
           <h1 className="flex font-serif justify-center space-x-3 lg:text-4xl text-2xl font-bold p-5 text-center">

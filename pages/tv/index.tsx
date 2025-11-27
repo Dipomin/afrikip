@@ -2,10 +2,10 @@ import React from "react";
 import Layout from "../../components/layout";
 import LintelligentTv from "../../components/lintelligent-tv";
 
-const LIntelligentTV = ({ preview, user }) => {
+const LIntelligentTV = () => {
   return (
     <div>
-      <Layout preview={preview} user={user}>
+      <Layout>
         <LintelligentTv />
       </Layout>
     </div>

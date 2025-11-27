@@ -95,7 +95,7 @@ const PaiementMensuel = () => {
   };
 
   return (
-    <Layout preview={""}>
+    <Layout>
       <div className="bg-gray-500">
         <div className="grid justify-items-center">
           <div>

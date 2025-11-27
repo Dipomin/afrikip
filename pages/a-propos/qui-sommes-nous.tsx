@@ -2,9 +2,9 @@ import React from "react";
 import Layout from "../../components/layout";
 import Container from "../../components/container";
 
-const QuiQommesNous = ({ preview, user }) => {
+const QuiQommesNous = () => {
   return (
-    <Layout preview={preview} user={user}>
+    <Layout>
       <Container>
         <article>
           <h1 className="text-4xl font-bold p-5">À propos de Afrikipresse</h1>

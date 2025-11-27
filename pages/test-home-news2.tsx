@@ -72,7 +72,7 @@ export default function TestHomeNews2({ preview = false }) {
         articleSection=""
       />
       
-      <Layout preview={preview}>
+      <Layout>
         <Container>
           <div className="py-8">
             {/* En-tête */}

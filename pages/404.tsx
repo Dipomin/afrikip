@@ -3,10 +3,10 @@ import Button from "../components/button";
 import Layout from "../components/layout";
 import { ArrowLeft } from "lucide-react";
 
-export default function Custom404({ preview, user }) {
+export default function Custom404() {
   return (
     <div>
-      <Layout preview={preview} user={user}>
+      <Layout>
         <div className="w-screen h-screen">
           <h1 className="text-3xl text-red-600 text-center p-10">
             404 - La Page que vous recherchez est introuvable

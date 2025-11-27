@@ -22,7 +22,7 @@ interface ApiResponse {
   payment_url: string;
 }
 
-const PaiementAnnuel = ({ preview }) => {
+const PaiementAnnuel = () => {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
@@ -96,7 +96,7 @@ const PaiementAnnuel = ({ preview }) => {
   };
 
     return (
-      <Layout preview={""}>
+      <Layout>
         <div className="bg-gray-500">
           <div className="grid justify-items-center">
             <div>

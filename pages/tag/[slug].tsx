@@ -97,7 +97,7 @@ const TagPage: React.FC = () => {
   };
 
   return (
-    <Layout preview={""}>
+    <Layout>
       <Container>
         <div className="flex">
           <div>

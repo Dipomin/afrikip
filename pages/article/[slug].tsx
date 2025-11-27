@@ -131,7 +131,7 @@ const generateStructuredData = (
   return structuredData;
 };
 
-const Post = ({ post, preview = true, relatedPosts }) => {
+const Post = ({ post, relatedPosts }) => {
   const router = useRouter();
   const [article, setArticle] = useState<string>("");
   const [isClient, setIsClient] = useState(false);

@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Button } from "../../@/components/ui/button";
 import Layout from "../../components/layout";
-import preview from "../../0000app.OLD/api/preview";
 
 import Container from "../../components/container";
 import { PlusCircle, Search } from "lucide-react";
@@ -94,7 +93,7 @@ const SearchResults: React.FC = () => {
   };
 
   return (
-    <Layout preview={preview}>
+    <Layout>
       <Container>
         <div className="flex">
           <div>
