@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button } from "../../../../../components/admin-journal/ui/button";
-import { DataTableUser } from "../../../../../components/admin-journal/table/TableUser";
-import { FileType } from "../../../../../typings";
-import { Skeleton } from "../../../../../components/admin-journal/ui/skeleton";
-import { columns } from "../../../../../components/admin-journal/table/columns";
-import { db } from "../../../../../firebase";
+import { Button } from "../ui/button";
+import { DataTableUser } from "../table/TableUser";
+import { FileType } from "../../../typings";
+import { Skeleton } from "../ui/skeleton";
+import { columns } from "../table/columns";
+import { db } from "../../../firebase";
 import { query, collection, orderBy, limit } from "firebase/firestore";
 import { useAuth } from "../../../../../hooks/useAuth";
 import { useCollection } from "react-firebase-hooks/firestore";
