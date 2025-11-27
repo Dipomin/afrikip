@@ -1,36 +1,15 @@
 import ArchivesAnnees from "../../../../../components/archives-annees";
-import Link from "next/link";
-import React from "react";
 import TableWrapperUser from "./TableWrapperUser";
-import { Button } from "../../../../../components/admin-journal/ui/button";
 import { FileType } from "../../../../../typings";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../../../../firebase";
+import { GetServerSideProps } from "next";
 
-// Force dynamic rendering - Firebase data cannot be prerendered
-export const dynamic = "force-dynamic";
+interface DashboardProps {
+  skeletonFiles: FileType[];
+}
 
-async function Dashboard() {
-  //const userId = user?.id;
-
-  //console.log(user);
-
-  const docsResults = await getDocs(collection(db, "archives", "pdf", "2018"));
-
-  //console.log("Docs results",docsResults.docs.map((doc) => doc.data()));
-
-  const skeletonFiles: FileType[] = docsResults.docs.map((doc) => ({
-    id: doc.id,
-    filename: doc.data().filename || doc.id,
-    timestamp: new Date(doc.data().timestamp?.seconds * 1000) || undefined,
-    fullName: doc.data().fullName,
-    downloadURL: doc.data().downloadURL,
-    type: doc.data().type,
-    size: doc.data().size,
-  }));
-
-  //console.log("Skeleton Files :", skeletonFiles);
-
+function Dashboard({ skeletonFiles }: DashboardProps) {
   return (
     <div className="border-t">
       <section className="container space-y-5">
@@ -48,5 +27,25 @@ async function Dashboard() {
     </div>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  const docsResults = await getDocs(collection(db, "archives", "pdf", "2018"));
+
+  const skeletonFiles: FileType[] = docsResults.docs.map((doc) => ({
+    id: doc.id,
+    filename: doc.data().filename || doc.id,
+    timestamp: new Date(doc.data().timestamp?.seconds * 1000) || undefined,
+    fullName: doc.data().fullName,
+    downloadURL: doc.data().downloadURL,
+    type: doc.data().type,
+    size: doc.data().size,
+  }));
+
+  return {
+    props: {
+      skeletonFiles,
+    },
+  };
+};
 
 export default Dashboard;

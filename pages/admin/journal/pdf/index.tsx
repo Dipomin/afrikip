@@ -1,9 +1,8 @@
 import React from "react";
-
 import Image from "next/image";
 import ArchivesAnnees from "../../../../components/archives-annees";
 
-async function Dashboard() {
+function Dashboard() {
   return (
     <div className="border-t">
       <section className="container space-y-5">
