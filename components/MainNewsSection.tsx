@@ -137,11 +137,11 @@ const MainNewsSection: React.FC<MainNewsSectionProps> = ({
   const heroPostsWithDefaults = validHeroPosts
     .filter((post) => isValidPost(post))
     .map((post) => ({
-      title: post.title,
+      title: post.title || "",
       coverImage: post.featuredImage || DEFAULT_IMAGE,
       author: getValidAuthor(post.author),
       date: post.date || "",
-      slug: post.slug,
+      slug: post.slug || "",
       excerpt: post.excerpt || "",
     }));
 

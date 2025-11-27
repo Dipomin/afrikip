@@ -16,16 +16,29 @@ NC='\033[0m' # No Color
 ENVIRONMENT=${1:-production}
 APP_NAME="afrikipresse"
 APP_PORT=3001
-BUILD_DIR="./build-${ENVIRONMENT}"
+BUILD_DIR="/tmp/build-${APP_NAME}-${ENVIRONMENT}"
+CURRENT_DIR=$(pwd)
 
 echo -e "${BLUE}🚀 Starting deployment for ${APP_NAME} (${ENVIRONMENT})${NC}"
 
-# Vérifier les variables d'environnement requises
-if [ -z "$VPS_HOST" ] || [ -z "$VPS_USER" ]; then
-    echo -e "${RED}❌ Error: VPS_HOST and VPS_USER environment variables must be set${NC}"
-    echo "Export them first:"
-    echo "  export VPS_HOST=your-vps-ip"
-    echo "  export VPS_USER=your-username"
+# Demander les informations de connexion si non définies
+if [ -z "$VPS_HOST" ]; then
+    echo -e "${YELLOW}🔐 Configuration de connexion VPS${NC}"
+    read -p "Adresse du VPS (IP ou domaine): " VPS_HOST
+fi
+
+if [ -z "$VPS_USER" ]; then
+    read -p "Nom d'utilisateur SSH: " VPS_USER
+fi
+
+if [ -z "$VPS_PASSWORD" ]; then
+    read -s -p "Mot de passe SSH: " VPS_PASSWORD
+    echo ""
+fi
+
+# Vérifier que les informations sont fournies
+if [ -z "$VPS_HOST" ] || [ -z "$VPS_USER" ] || [ -z "$VPS_PASSWORD" ]; then
+    echo -e "${RED}❌ Error: Informations de connexion incomplètes${NC}"
     exit 1
 fi
 
@@ -109,16 +122,27 @@ EOF
 # 8. Créer l'archive
 step "Creating deployment archive..."
 cd $BUILD_DIR
-tar -czf ../deployment-${ENVIRONMENT}.tar.gz .
-cd ..
+ARCHIVE_PATH="/tmp/deployment-${APP_NAME}-${ENVIRONMENT}.tar.gz"
+tar -czf $ARCHIVE_PATH .
+cd $CURRENT_DIR
 
 # 9. Uploader sur le VPS
 step "Uploading to VPS..."
-scp deployment-${ENVIRONMENT}.tar.gz ${VPS_USER}@${VPS_HOST}:/tmp/ || error "Failed to upload to VPS"
+if command -v sshpass &> /dev/null; then
+    sshpass -p "$VPS_PASSWORD" scp -o StrictHostKeyChecking=no $ARCHIVE_PATH ${VPS_USER}@${VPS_HOST}:/tmp/ || error "Failed to upload to VPS"
+else
+    echo -e "${YELLOW}⚠️  sshpass non installé. Installation...${NC}"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install hudochenkov/sshpass/sshpass
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y sshpass || sudo yum install -y sshpass
+    fi
+    sshpass -p "$VPS_PASSWORD" scp -o StrictHostKeyChecking=no $ARCHIVE_PATH ${VPS_USER}@${VPS_HOST}:/tmp/ || error "Failed to upload to VPS"
+fi
 
 # 10. Exécuter le déploiement sur le VPS
 step "Executing deployment on VPS..."
-ssh ${VPS_USER}@${VPS_HOST} << 'ENDSSH'
+sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} << 'ENDSSH'
     set -e
     
     APP_NAME="afrikipresse"
@@ -141,8 +165,8 @@ ssh ${VPS_USER}@${VPS_HOST} << 'ENDSSH'
     
     echo "📤 Extracting deployment package..."
     cd $APP_DIR
-    tar -xzf /tmp/deployment-production.tar.gz
-    rm /tmp/deployment-production.tar.gz
+    tar -xzf /tmp/deployment-afrikipresse-production.tar.gz
+    rm /tmp/deployment-afrikipresse-production.tar.gz
     
     echo "🔧 Setting up environment..."
     # Créer .env.local avec les vraies valeurs depuis /etc/environment.d/afrikipresse
@@ -192,7 +216,7 @@ fi
 # 12. Nettoyer
 step "Cleaning up..."
 rm -rf $BUILD_DIR
-rm deployment-${ENVIRONMENT}.tar.gz
+rm -f $ARCHIVE_PATH
 
 echo -e "${GREEN}🎉 Deployment completed successfully!${NC}"
 echo -e "${BLUE}Application is running at: ${SITE_URL}${NC}"

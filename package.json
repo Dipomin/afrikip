@@ -41,6 +41,7 @@
     "date-fns": "^2.30.0",
     "encoding": "^0.1.13",
     "firebase": "^10.11.0",
+    "firebase-admin": "^13.6.0",
     "formidable": "^3.5.1",
     "ftp": "^0.3.10",
     "gcp-metadata": "^6.1.0",
