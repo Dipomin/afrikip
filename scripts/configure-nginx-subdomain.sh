@@ -101,10 +101,6 @@ server {
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
-    # Session SSL (options-ssl-nginx.conf contient déjà protocols et ciphers)
-    ssl_session_cache shared:SSL:10m;
-    ssl_session_timeout 10m;
-
     # Headers de sécurité
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
     add_header X-Frame-Options "SAMEORIGIN" always;
