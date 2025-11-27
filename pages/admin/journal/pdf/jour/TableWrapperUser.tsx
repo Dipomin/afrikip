@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import { Button } from "../../../../../components/admin-journal/ui/button";
 import { DataTableUser } from "../../../../../components/admin-journal/table/TableUser";
@@ -9,10 +11,9 @@ import { query, collection, orderBy, limit } from "firebase/firestore";
 import { useAuth } from "../../../../../hooks/useAuth";
 import { useCollection } from "react-firebase-hooks/firestore";
 
-"use client";
-
 // Force dynamic rendering - Firebase data cannot be prerendered
 export const dynamic = "force-dynamic";
+
 
 function TableWrapper({ skeletonFiles }: { skeletonFiles: FileType[] }) {
   const { user } = useAuth();
