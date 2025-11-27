@@ -4,7 +4,6 @@ import Container from "../../components/container";
 import { getAllPostsBeforeDecember2021 } from "../../lib/api";
 import Button from "../../components/button";
 import Layout from "../../components/layout";
-import { useUser } from "@supabase/auth-helpers-react";
 import Image from "next/image";
 import { Archive, ArrowRight } from "lucide-react";
 import he from "he";
@@ -69,18 +68,11 @@ const ArticlesByYear = (
   preview
 ) => {
   const [displayedArticles, setDisplayedArticles] = useState(20);
-  const user = useUser();
-  const userId = user?.id;
+
   const route = useRouter();
 
-  useEffect(() => {
-    if (!user) {
-      route.push("/signin");
-    }
-  }, []);
-
   return (
-    <Layout preview={preview} user={userId}>
+    <Layout preview={preview}>
       <Container>
         <div>
           <h1 className="flex font-serif justify-center space-x-3 lg:text-4xl text-2xl font-bold p-5 text-center">

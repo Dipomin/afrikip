@@ -6,7 +6,7 @@ export default function PreviewMiniDisplay({ title, coverImage, slug }) {
     <div className="flex flex-col mx-4 mb-5">
       <div className="mb-5 object-cover ">
         {coverImage && (
-          <CoverImage title={title} coverImage={coverImage} slug={slug} />
+          <CoverImage title={title} coverImage={coverImage || ""} slug={slug} />
         )}
       </div>
       <h3 className="text-[12px] font-semibold leading-snug line-clamp-3">

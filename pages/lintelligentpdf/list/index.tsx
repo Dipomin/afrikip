@@ -1,52 +1,53 @@
-import React, { useEffect } from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth, db } from "../../../firebase";
+import { doc, getDoc } from "firebase/firestore";
 import JournalArchive from "../../../components/journal-archives";
 import Layout from "../../../components/layout";
-import { useSession, useUser } from "@supabase/auth-helpers-react";
-import { getSession } from "../../../lib/supabase-server";
-import { useRouter } from "next/navigation";
-import { Button } from "../../../components/ui/button";
+import UserHeader from "../../../components/UserHeader";
 
 const ListPDF = () => {
-  const session = useSession();
-  const user = session?.user;
-  const route = useRouter();
+  const [user, loading] = useAuthState(auth);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
 
-  {
-    /** 
   useEffect(() => {
-    const checkUser = async () => {
-      const session = await getSession();
-      if (!session) {
-        route.push("/signin");
+    const fetchUserData = async () => {
+      if (user) {
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setUserRole(userData.role || null);
+            setUserName(userData.name || userData.displayName || null);
+          }
+        } catch (error) {
+          console.error("Erreur récupération données utilisateur:", error);
+        }
       }
     };
-    checkUser();
-  }, [router]);
-*/
-  }
-  if (!user) {
+
+    fetchUserData();
+  }, [user]);
+
+  if (loading) {
     return (
-      <Layout user={""} preview={""}>
-        <div className="grid grid-cols-1 justify-items-center text-center p-10">
-          <div className="w-[500px] bg-slate-300/50 rounded-md p-8">
-            <div className="text-lg font-bold text-red-600">
-              Désolé, vous n'êtes pas connecté à votre compte. <br />{" "}
-              Connectez-vous ou créez-en un.
-            </div>
-            <Button onClick={() => route.push("/signin")}>
-              Créer un compte
-            </Button>
-          </div>
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
       </Layout>
     );
-  } else {
-    return (
-      <Layout user={user} preview={""}>
-        <JournalArchive />
-      </Layout>
-    );
   }
+
+  return (
+    <Layout>
+      <UserHeader user={user || null} userRole={userRole} userName={userName} />
+      <JournalArchive />
+    </Layout>
+  );
 };
 
 export default ListPDF;

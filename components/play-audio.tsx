@@ -34,7 +34,7 @@ function PlayAudio({ post }) {
       .catch((error) => {
         console.log("Quelque chose s'est mal passée", error);
       });
-  }, []);
+  }, [post]);
 
   console.log(articleAudio);
 

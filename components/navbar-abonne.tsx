@@ -2,27 +2,14 @@ import Link from "next/link";
 import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
-//import { useUser } from "../hooks/useUser";
 import { FaUserAlt } from "react-icons/fa";
 import toast from "react-hot-toast";
-import { getSession } from "../lib/supabase-server";
 
 const NavbarAbonne = () => {
   const route = useRouter();
-  const supabaseClient = useSupabaseClient();
-  //const { user } = useUser();
-  const session = getSession();
 
   const handleLogout = async () => {
-    const { error } = await supabaseClient.auth.signOut();
-    route.refresh();
-
-    if (error) {
-      toast.error(error.message);
-    } else {
       toast.success("Vous avez été deconnecté");
-    }
   };
 
   return (
@@ -58,15 +45,6 @@ const NavbarAbonne = () => {
                 </Link>
               </div>
             }
-
-            {/**
-            <button
-              onClick={() => route.push("/abonnement")}
-              className="bg-red-700 p-3 text-white rounded-full"
-            >
-                <FaUserAlt /> 
-            </button>
-            */}
           </div>
         </div>
       </div>

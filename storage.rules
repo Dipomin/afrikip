@@ -1,0 +1,42 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Fonction helper pour vérifier si l'utilisateur est admin
+    function isAdmin() {
+      return request.auth != null && 
+             firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'ADMIN';
+    }
+    
+    // Fonction pour vérifier si l'utilisateur est connecté
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Archives PDF - Lecture publique, écriture admin uniquement
+    match /archives/pdf/{year}/{documentId} {
+      // Lecture publique pour tous
+      allow read: if true;
+      
+      // Upload/modification/suppression uniquement pour les admins
+      allow write: if isAdmin();
+    }
+    
+    // Couvertures des archives - Lecture publique, écriture admin
+    match /archives/covers/{year}/{filename} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Images de profil - Lecture publique, écriture pour l'utilisateur propriétaire ou admin
+    match /users/{userId}/profile/{filename} {
+      allow read: if true;
+      allow write: if request.auth.uid == userId || isAdmin();
+    }
+    
+    // Autres fichiers - Blocage par défaut
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Button } from "../../components/ui/button";
 import Layout from "../../components/layout";
-import { useUser } from "@supabase/auth-helpers-react";
+
 import Container from "../../components/container";
 import { PlusCircle, Search } from "lucide-react";
 import { ClipLoader } from "react-spinners";
@@ -96,11 +96,8 @@ const TagPage: React.FC = () => {
     }
   };
 
-  const user = useUser();
-  const userId = user?.id;
-
   return (
-    <Layout preview={""} user={userId}>
+    <Layout preview={""}>
       <Container>
         <div className="flex">
           <div>

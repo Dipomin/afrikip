@@ -1,70 +1,138 @@
+import { GetServerSidePropsContext } from 'next';
+import { collection, query, where, getDocs, limit as firestoreLimit } from 'firebase/firestore';
+import { db } from '../firebase';
+import * as admin from 'firebase-admin';
 
-"use client";
-
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Database } from '../types_db';
-
-export const createServerSupabaseClient = (() =>
-  createClientComponentClient<Database>()
-  
-);
-
-export async function getSession() {
-  const supabase = createServerSupabaseClient();
+// Initialiser Firebase Admin SDK (côté serveur uniquement)
+if (!admin.apps.length) {
   try {
-    const {
-      data: { session }
-    } = await supabase.auth.getSession();
-    return session;
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      }),
+    });
+  } catch (error) {
+    console.error('Firebase admin initialization error', error);
+  }
+}
+
+export const getSession = async (ctx: GetServerSidePropsContext) => {
+  try {
+    const token = ctx.req.cookies.firebaseToken;
+    if (!token) return null;
+
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    return {
+      user: {
+        id: decodedToken.uid,
+        email: decodedToken.email || '',
+      },
+    };
+  } catch (error) {
+    return null;
+  }
+};
+
+export const getUser = async (ctx: GetServerSidePropsContext) => {
+  const session = await getSession(ctx);
+  return session?.user || null;
+};
+
+export const getSubscription = async (ctx: GetServerSidePropsContext) => {
+  const session = await getSession(ctx);
+
+  if (!session?.user) {
+    return null;
+  }
+
+  try {
+    const subscriptionsRef = collection(db, 'subscriptions');
+    const q = query(
+      subscriptionsRef,
+      where('user_id', '==', session.user.id),
+      where('status', 'in', ['trialing', 'active']),
+      firestoreLimit(1)
+    );
+
+    const snapshot = await getDocs(q);
     
+    if (snapshot.empty) {
+      return null;
+    }
+
+    const subscriptionDoc = snapshot.docs[0];
+    const subscriptionData = subscriptionDoc.data();
+
+    // Charger les données du prix et du produit
+    if (subscriptionData.price_id) {
+      const priceDoc = await getDocs(
+        query(collection(db, 'prices'), where('id', '==', subscriptionData.price_id), firestoreLimit(1))
+      );
+      
+      if (!priceDoc.empty) {
+        const priceData = priceDoc.docs[0].data();
+        subscriptionData.prices = priceData;
+
+        if (priceData.product_id) {
+          const productDoc = await getDocs(
+            query(collection(db, 'products'), where('id', '==', priceData.product_id), firestoreLimit(1))
+          );
+          
+          if (!productDoc.empty) {
+            subscriptionData.prices.products = productDoc.docs[0].data();
+          }
+        }
+      }
+    }
+
+    return { id: subscriptionDoc.id, ...subscriptionData };
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Erreur récupération abonnement:', error);
     return null;
   }
-}
+};
 
-export async function getUserDetails() {
-  const supabase = createServerSupabaseClient();
+// Vérifie si l'utilisateur a accès à un PDF spécifique
+export const checkPDFAccess = async (
+  ctx: GetServerSidePropsContext,
+  pdfId: string
+): Promise<{ hasAccess: boolean; reason: 'subscription' | 'purchase' | 'none' }> => {
+  const session = await getSession(ctx);
+  
+  if (!session?.user) {
+    return { hasAccess: false, reason: 'none' };
+  }
+
+  // 1. Vérifier l'abonnement actif
+  const subscription = await getSubscription(ctx);
+  if (subscription && ['trialing', 'active'].includes(subscription.status)) {
+    return { hasAccess: true, reason: 'subscription' };
+  }
+
+  // 2. Vérifier l'achat individuel (Firestore orders collection)
   try {
-    const { data: userDetails } = await supabase
-      .from('users')
-      .select('*')
-      .single();
-    return userDetails;
+    const ordersRef = collection(db, 'orders');
+    const q = query(
+      ordersRef,
+      where('customer.email', '==', session.user.email),
+      where('status', '==', 'paid')
+    );
+
+    const snapshot = await getDocs(q);
+    
+    for (const orderDoc of snapshot.docs) {
+      const orderData = orderDoc.data();
+      const items = orderData.items || [];
+      
+      if (items.some((item: any) => item.id === pdfId)) {
+        return { hasAccess: true, reason: 'purchase' };
+      }
+    }
   } catch (error) {
-    console.error('Error:', error);
-    return null;
+    console.error('Erreur vérification achat:', error);
   }
-}
-
-export async function getSubscription() {
-  const supabase = createServerSupabaseClient();
-  try {
-    const { data: subscription } = await supabase
-      .from('subscriptions')
-      .select('*, prices(*, products(*))')
-      .in('status', ['trialing', 'active'])
-      .maybeSingle()
-      .throwOnError();
-    return subscription;
-  } catch (error) {
-    console.error('Error:', error);
-    return null;
-  }
-}
-
-export const getActiveProductsWithPrices = async () => {
-  const supabase = createServerSupabaseClient();
-  const { data, error } = await supabase
-    .from('products')
-    .select('*, prices(*)')
-    .eq('active', true)
-    .eq('prices.active', true)
-    .order('metadata->index')
-    .order('unit_amount', { foreignTable: 'prices' });
-
-  if (error) {
-    console.log(error.message);
-  }
-  return data ?? [];
+  
+  return { hasAccess: false, reason: 'none' };
 };

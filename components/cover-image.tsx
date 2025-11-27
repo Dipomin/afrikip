@@ -33,6 +33,18 @@ export default function CoverImage({ title, coverImage, slug }: Props) {
   }
 
   const image = (
+    <img
+      src={imageSrc}
+      alt={title || ""}
+      width={1500}
+      height={800}
+      className={cn("shadow-small", {
+        "hover:shadow-medium transition-shadow duration-200 rounded-sm": slug,
+      })}
+    />
+
+    /**
+     * 
     <Image
       width={1500}
       height={800}
@@ -43,6 +55,7 @@ export default function CoverImage({ title, coverImage, slug }: Props) {
       })}
       priority={true}
     />
+     */
   );
 
   return (

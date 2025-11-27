@@ -2,12 +2,9 @@
 
 import React, { useState } from "react";
 import axios, { AxiosResponse } from "axios";
-import { createClient } from "@supabase/supabase-js";
 
-import { Database } from "../../../types_db";
-import { useSession } from "@supabase/auth-helpers-react";
 import Image from "next/image";
-import Button from "../../../app/abonnement/components/ui/Button";
+import Button from "../../../0000app.OLD/abonnement/components/ui/Button";
 import {
   Card,
   CardContent,
@@ -21,11 +18,6 @@ import Layout from "../../../components/layout";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
-const supabase = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-);
-
 interface ApiResponse {
   payment_url: string;
 }
@@ -33,9 +25,7 @@ interface ApiResponse {
 const PaiementAnnuel = ({ preview }) => {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
-  const session = useSession();
 
-  const user = session?.user;
   const randomCustomerId = BigInt(
     Math.floor(Math.random() * 100000000).toString()
   );
@@ -79,14 +69,6 @@ const PaiementAnnuel = ({ preview }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Insérez les données du formulaire dans la table mobilepayment de Supabase
-      const { data, error } = await supabase
-        .from("mobilepayment")
-        .upsert([formData]);
-
-      if (error) {
-        throw error;
-      } else {
         try {
           const response: AxiosResponse<ApiResponse> = await axios.post(
             "/api/cinetpay-a",
@@ -108,15 +90,13 @@ const PaiementAnnuel = ({ preview }) => {
         } catch (error) {
           console.error(error);
         }
-      }
     } catch (error) {
       console.error("Erreur lors de l'insertion des données :", error);
     }
   };
 
-  if (user) {
     return (
-      <Layout user={user} preview={""}>
+      <Layout preview={""}>
         <div className="bg-gray-500">
           <div className="grid justify-items-center">
             <div>
@@ -262,24 +242,6 @@ const PaiementAnnuel = ({ preview }) => {
         </div>
       </Layout>
     );
-  } else {
-    return (
-      <Layout user={user} preview={preview}>
-        <div className="grid grid-col-1 justify-center pt-8">
-          <div className="text-center">
-            <div>
-              <h1 className="text-2xl font-bold pb-6 text-center">
-                Vous n&apos;êtes pas autorisé
-              </h1>
-            </div>
-            <Link href={"/"}>
-              <Button className="w-fit">Retourner</Button>
-            </Link>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
 };
 
 export default PaiementAnnuel;

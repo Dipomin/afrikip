@@ -3,15 +3,11 @@
 import { useState } from "react";
 import axios, { AxiosResponse } from "axios";
 import Head from "next/head";
-import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { Button } from "../@/components/ui/button";
-import { Database } from "../types_db";
 
-const supabase = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-);
+
+
 
 interface ApiResponse {
   payment_url: string;
@@ -53,14 +49,6 @@ export default function MobileMoney() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Insérez les données du formulaire dans la table mobilepayment de Supabase
-      const { data, error } = await supabase
-        .from("mobilepayment")
-        .upsert([formData]);
-
-      if (error) {
-        throw error;
-      } else {
         try {
           const response: AxiosResponse<ApiResponse> = await axios.post(
             "/api/cinetpay",
@@ -82,7 +70,6 @@ export default function MobileMoney() {
         } catch (error) {
           console.error(error);
         }
-      }
     } catch (error) {
       console.error("Erreur lors de l'insertion des données :", error);
     }

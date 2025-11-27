@@ -1,0 +1,75 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Fonction helper pour vérifier si l'utilisateur est admin
+    function isAdmin() {
+      return request.auth != null && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN';
+    }
+    
+    // Fonction pour vérifier si l'utilisateur est connecté
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Collection users - Les utilisateurs peuvent lire/écrire leur propre document
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if request.auth.uid == userId || isAdmin();
+    }
+    
+    // Collection subscriptions - Admins uniquement en écriture, tous en lecture si connecté
+    match /subscriptions/{subscriptionId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // Collection journals - Gestion des journaux uploadés
+    match /journals/{journalId} {
+      allow read: if true; // Public en lecture
+      allow create: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+    
+    // ⭐ ARCHIVES - Structure: archives/pdf/{year}/{documentId}
+    // Cette structure permet de stocker les journaux par année
+    match /archives/pdf/{year}/{documentId} {
+      // Lecture publique pour tous les journaux
+      allow read: if true;
+      
+      // Création/modification/suppression uniquement pour les admins
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // Match direct sur archives/pdf/{year} pour les queries de collection
+    match /archives/{type}/{year} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Collection orders - Commandes e-commerce pour achat de PDFs
+    match /orders/{orderId} {
+      // Lecture: Uniquement l'auteur de la commande ou admin
+      allow read: if isAuthenticated() && 
+                     (request.auth.uid == resource.data.userId || isAdmin());
+      
+      // Création: Tout le monde peut créer (via API)
+      // Note: Dans l'idéal, utiliser Firebase Admin SDK côté serveur
+      allow create: if true;
+      
+      // Mise à jour: Seulement via webhook (on permet temporairement)
+      allow update: if true;
+      
+      // Suppression: Admins uniquement
+      allow delete: if isAdmin();
+    }
+    
+    // Fallback: bloquer tout le reste par défaut
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

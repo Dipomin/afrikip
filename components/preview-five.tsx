@@ -25,7 +25,7 @@ export default function PreviewFive({
     <Card className="group hover:shadow-lg border-none bg-background/50 backdrop-blur-sm">
       <Link href={`/article/${slug}`} className="flex flex-col p-4">
         {/* Image en haut */}
-        <div className="relative h-48 w-full overflow-hidden">
+        <div className="relative h-64 w-full overflow-hidden">
           {coverImage && (
             <div className="h-full w-full transform transition-transform duration-500 group-hover:scale-105">
               <CoverImage title={title} coverImage={coverImage} slug={slug} />
@@ -34,7 +34,7 @@ export default function PreviewFive({
         </div>
 
         {/* Contenu en bas */}
-        <div className="flex flex-col p-4">
+        <div className="flex flex-col">
           {/* Titre */}
           <h3
             className={cn(
@@ -50,27 +50,7 @@ export default function PreviewFive({
               className="text-muted-foreground text-sm mb-3 line-clamp-2"
               dangerouslySetInnerHTML={{ __html: excerpt }}
             />
-          )}
-
-          {/* Lire la suite */}
-          <div className="border-t border-muted/20 pt-2">
-            <span className="text-primary text-sm font-medium inline-flex items-center">
-              Lire l'article
-              <svg
-                className="ml-2 w-4 h-4 transition-transform duration-200 group-hover:translate-x-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </span>
-          </div>
+          )}          
         </div>
       </Link>
     </Card>

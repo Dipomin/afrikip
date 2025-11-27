@@ -1,19 +1,10 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-// biome-ignore lint/style/useImportType: <explanation>
-import { Database } from './types_db'
+
 
 export async function middleware(req: NextRequest) {
   // Create a response to modify response headers later
-  const res = NextResponse.next()
-  
-  // Create authenticated Supabase Client
-  const supabase = createMiddlewareClient<Database>({ req, res })
-  
-  // Check if there's a valid session
-  const { data: session } = await supabase.auth.getSession()
-  
+  const res = NextResponse.next()  
   const url = req.nextUrl.clone();
 
   // Define paths that are allowed without redirection
@@ -134,7 +125,25 @@ export async function middleware(req: NextRequest) {
     '/api',
     '/aujourdhui.png',
     '/recrutement_consultant_arstm.png',
-    '/yandex_5002873b64bf9d4f.html'
+    '/yandex_5002873b64bf9d4f.html',
+    '/journal',
+    "/lintelligentpdf/aujourdhui",
+    "/lintelligentpdf/list",
+    "/connexion",
+    "/inscription",
+    "/forgot-password",
+    "/reset-password",
+    "/abonnement/confirm",
+    "/abonnement/cancel",
+    "/abonnement/success",
+    "/paiement/succes",
+    "/paiement/echec",
+    "/admin",
+    "/admin/journal",
+    "/admin/users",
+    "/admin/subscriptions",
+    "/checkout",
+    "/dashboard"
   ];
 
   const segments = ['/economie/', '/politique/', '/news/', '/societe/', '/afrique/', '/sports/', '/opinion/'];

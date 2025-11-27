@@ -1,10 +1,10 @@
 export default function comparerDateDeParution(articleDate: string): void {
   if (typeof articleDate === "string") {
     // Convertir la date de l'article en objet Date
-    const dateArticle: Date = new Date(articleDate);
+    const dateArticle: globalThis.Date = new globalThis.Date(articleDate);
 
     // Date du 31 décembre 2021
-    const dateLimite: Date = new Date("2021-12-31");
+    const dateLimite: globalThis.Date = new globalThis.Date("2021-12-31");
 
     // Comparer les dates
     if (dateArticle <= dateLimite) {

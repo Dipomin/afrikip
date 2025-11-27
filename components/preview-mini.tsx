@@ -8,7 +8,17 @@ export default function PreviewMini({ posts }) {
           <PreviewMiniDisplay
             key={node.slug}
             title={node.title}
-            coverImage={node.featuredImage}
+            coverImage={
+              node.featuredImage || {
+                node: {
+                  sourceUrl: "https://www.afrikipresse.fr/default.png",
+                  mediaDetails: {
+                    width: 1500,
+                    height: 800,
+                  },
+                },
+              }
+            }
             slug={node.slug}
           />
         ))}

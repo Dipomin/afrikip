@@ -3,8 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Button } from "../../@/components/ui/button";
 import Layout from "../../components/layout";
-import preview from "../../app/api/preview";
-import { useUser } from "@supabase/auth-helpers-react";
+import preview from "../../0000app.OLD/api/preview";
+
 import Container from "../../components/container";
 import { PlusCircle, Search } from "lucide-react";
 import { ClipLoader } from "react-spinners";
@@ -93,11 +93,8 @@ const SearchResults: React.FC = () => {
     searchArticles(keyword as string, currentPage + 1);
   };
 
-  const user = useUser();
-  const userId = user?.id;
-
   return (
-    <Layout preview={preview} user={userId}>
+    <Layout preview={preview}>
       <Container>
         <div className="flex">
           <div>

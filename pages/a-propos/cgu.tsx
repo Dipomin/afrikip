@@ -2,14 +2,12 @@ import { LocateIcon, Mail, MapPinIcon, PhoneIcon } from "lucide-react";
 import React from "react";
 import LayoutAbonne from "../../components/layout-abonne";
 import Layout from "../../components/layout";
-import { useUser } from "@supabase/auth-helpers-react";
+
 import Container from "../../components/container";
 
 const CGU = ({ preview }) => {
-  const user = useUser();
-
   return (
-    <Layout preview={preview} user={user}>
+    <Layout preview={preview}>
       <Container>
         <div>
           <div className="text-2xl lg:text-4xl font-black text-center p-10 text-black">
@@ -30,7 +28,7 @@ const CGU = ({ preview }) => {
                 Hébergeurs
               </div>
               <div> Ligne Web Service (LWS)</div>
-              <div>Supabase</div>
+              <div></div>
             </div>
             <div>
               <div className="text-xl lg:text-2xl font-extrabold">
