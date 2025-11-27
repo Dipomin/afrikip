@@ -8,10 +8,11 @@ import { db } from "../../../../../firebase";
 import { query, collection, orderBy } from "firebase/firestore";
 import { useCollection } from "react-firebase-hooks/firestore";
 
+"use client";
+
 // Force dynamic rendering - Firebase data cannot be prerendered
 export const dynamic = "force-dynamic";
 
-"use client";
 
 function TableWrapper({ skeletonFiles }: { skeletonFiles: FileType[] }) {
   //const user = useUser();

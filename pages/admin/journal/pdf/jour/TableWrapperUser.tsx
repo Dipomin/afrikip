@@ -9,10 +9,11 @@ import { query, collection, orderBy, limit } from "firebase/firestore";
 import { useAuth } from "../../../../../hooks/useAuth";
 import { useCollection } from "react-firebase-hooks/firestore";
 
+"use client";
+
 // Force dynamic rendering - Firebase data cannot be prerendered
 export const dynamic = "force-dynamic";
 
-"use client";
 function TableWrapper({ skeletonFiles }: { skeletonFiles: FileType[] }) {
   const { user } = useAuth();
   const [initialFiles, setInitialFiles] = useState<FileType[]>([]);
