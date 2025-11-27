@@ -2,9 +2,10 @@ module.exports = {
   apps: [
     {
       name: 'afrikipresse',
-      script: 'node_modules/.bin/next',
+      script: './node_modules/next/dist/bin/next',
       args: 'start',
       cwd: '/var/www/afrikipresse',
+      interpreter: 'node',
       instances: 2,
       exec_mode: 'cluster',
       autorestart: true,

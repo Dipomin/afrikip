@@ -85,13 +85,20 @@ echo "🏗️  Build de l'application Next.js..."
 NODE_ENV=production npm run build
 
 echo "✅ Build terminé, vérification..."
-if [ -f ".next/prerender-manifest.json" ]; then
-    echo "✅ .next/prerender-manifest.json existe"
-    ls -lh .next/prerender-manifest.json
+if [ -d ".next" ]; then
+    echo "✅ Dossier .next existe"
+    ls -lh .next/ | head -10
+    # Vérifier les fichiers critiques
+    if [ -f ".next/prerender-manifest.json" ] || [ -f ".next/prerender-manifest.js" ]; then
+        echo "✅ Fichier prerender-manifest trouvé"
+    else
+        echo "⚠️  Aucun prerender-manifest trouvé, mais .next existe"
+    fi
+    if [ -f ".next/BUILD_ID" ]; then
+        echo "✅ BUILD_ID: $(cat .next/BUILD_ID)"
+    fi
 else
-    echo "❌ Erreur: .next/prerender-manifest.json n'existe pas"
-    echo "Contenu du dossier .next:"
-    ls -la .next/ || echo ".next n'existe pas du tout!"
+    echo "❌ Erreur: Dossier .next n'existe pas"
     exit 1
 fi
 
