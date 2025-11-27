@@ -2,13 +2,13 @@
 
 import { FileType } from "../../../../../typings";
 import React, { useEffect, useState } from "react";
-import { Button } from "../../components/ui/button";
-import { columns } from "../../components/table/columns";
+import { Button } from "../../../../../components/admin-journal/ui/button";
+import { columns } from "../../../../../components/admin-journal/table/columns";
 import { useCollection } from "react-firebase-hooks/firestore";
 import { query, collection, orderBy } from "firebase/firestore";
 import { db } from "../../../../../firebase";
-import { Skeleton } from "../../components/ui/skeleton";
-import { DataTableUser } from "../../components/table/TableUser";
+import { Skeleton } from "../../../../../components/admin-journal/ui/skeleton";
+import { DataTableUser } from "../../../../../components/admin-journal/table/TableUser";
 
 function TableWrapper({ skeletonFiles }: { skeletonFiles: FileType[] }) {
   const [initialFiles, setInitialFiles] = useState<FileType[]>([]);
@@ -83,13 +83,13 @@ export default TableWrapper;
 
 import { FileType } from "../../../../typings";
 import React, { useEffect, useState } from "react";
-import { Button } from "../../components/ui/button";
-import { columns } from "../../components/table/columns";
+import { Button } from "../../../../../components/admin-journal/ui/button";
+import { columns } from "../../../../../components/admin-journal/table/columns";
 import { useCollection } from "react-firebase-hooks/firestore";
 import { query, collection, orderBy } from "firebase/firestore";
 import { db } from "../../../../firebase";
-import { Skeleton } from "../../components/ui/skeleton";
-import { DataTableUser } from "../../components/table/TableUser";
+import { Skeleton } from "../../../../../components/admin-journal/ui/skeleton";
+import { DataTableUser } from "../../../../../components/admin-journal/table/TableUser";
 
 function TableWrapper({ skeletonFiles }: { skeletonFiles: FileType[] }) {
   //const user = useUser();

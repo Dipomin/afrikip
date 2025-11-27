@@ -10,8 +10,8 @@ import {
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import React, { useState } from "react";
 import DropzoneComponent from "react-dropzone";
-import { db, storage } from "../../../../firebase";
-import { cn } from "../../../../lib/utils";
+import { db, storage } from "../../firebase";
+import { cn } from "../../lib/utils";
 import { toast } from "./ui/use-toast";
 
 function DropZone() {

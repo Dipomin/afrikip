@@ -17,10 +17,10 @@ import {
 } from "../ui/table";
 import { Button } from "../ui/button";
 import { PencilIcon, TrashIcon } from "lucide-react";
-import { FileType } from "../../../../../typings";
-import { useAppStore } from "../../../../../store/store";
-import { DeleteModal } from "../DeleteModal";
+import { FileType } from "../../../typings";
+import { useAppStore } from "../../../store/store";
 import RenameModal from "../RenameModal";
+import { DeleteModal } from "../DeleteModal";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];

@@ -10,8 +10,6 @@ import { Meta } from "../components/meta";
  * Page de test pour démontrer les améliorations du composant HomeNews2
  */
 export default function TestHomeNews2({ preview = false }) {
-  const user = useUser();
-
   // Données de test
   const sampleCoverImage = {
     node: {

@@ -443,11 +443,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         const similarPDFs = snapshot.docs
           .map((doc) => {
             const data = doc.data();
-            if (!data.coverImageURL || !data.downloadURL || doc.id === id)
+            if (!data.coverImageURL || !data.downloadURL || doc.id === id || !pdfData?.tags)
               return null;
 
             const commonTags = (data.tags || []).filter((tag: string) =>
-              pdfData.tags?.includes(tag)
+              pdfData?.tags?.includes(tag)
             );
 
             if (commonTags.length === 0) return null;

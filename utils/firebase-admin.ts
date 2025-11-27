@@ -100,7 +100,11 @@ const copyBillingDetailsToCustomer = async (
   if (!name || !phone || !address) return;
   
   try {
-    await stripe.customers.update(customer, { name, phone, address });
+    await stripe.customers.update(customer, { 
+      name, 
+      phone, 
+      address: address as Stripe.Emptyable<Stripe.AddressParam>
+    });
     
     const userDocRef = doc(db, 'users', uuid);
     await setDoc(userDocRef, {

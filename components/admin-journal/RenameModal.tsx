@@ -1,12 +1,12 @@
 "use client";
 
-import { useAppStore } from "../../../../store/store";
+import { useAppStore } from "../../store/store";
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { doc, updateDoc } from "firebase/firestore";
-import { db } from "../../../../firebase";
+import { db } from "../../firebase";
 import { toast } from "react-hot-toast";
 
 function RenameModal() {

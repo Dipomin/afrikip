@@ -1,14 +1,14 @@
 "use client";
 
-import { FileType } from "../../../../../typings";
+import { FileType } from "../../../typings";
 import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { columns } from "./columns";
 import { useCollection } from "react-firebase-hooks/firestore";
 import { query, collection, orderBy } from "firebase/firestore";
-import { db } from "../../../../../firebase";
+import { db } from "../../../firebase";
 import { Skeleton } from "../ui/skeleton";
-import { DataTableUser } from "./TableUser";
+import { DataTable } from "./Table";
 
 function TableWrapper({ skeletonFiles }: { skeletonFiles: FileType[] }) {
   //const user = useUser();
@@ -17,7 +17,7 @@ function TableWrapper({ skeletonFiles }: { skeletonFiles: FileType[] }) {
 
   const [docs, loading, error] = useCollection(
     //user &&
-    query(collection(db, "archives", "pdf", "2011"), orderBy("timestamp", sort))
+    query(collection(db, "archives", "pdf", "2024"), orderBy("timestamp", sort))
   );
 
   useEffect(() => {
@@ -25,8 +25,10 @@ function TableWrapper({ skeletonFiles }: { skeletonFiles: FileType[] }) {
     const files: FileType[] = docs.docs.map((doc) => ({
       id: doc.id,
       filename: doc.data().filename || doc.id,
-      timestamp: new Date(doc.data().timestamp?.seconds * 1000) || undefined,
-      fullName: doc.data().fileName,
+      timestamp: doc.data().timestamp?.seconds
+        ? new Date(doc.data().timestamp.seconds * 1000)
+        : null,
+      fullName: doc.data().fullName || doc.data().fileName,
       downloadURL: doc.data().downloadURL,
       type: doc.data().type,
       size: doc.data().size,
@@ -34,6 +36,8 @@ function TableWrapper({ skeletonFiles }: { skeletonFiles: FileType[] }) {
 
     setInitialFiles(files);
   }, [docs]);
+
+  //console.log("Initial files", initialFiles);
 
   if (docs?.docs.length === undefined)
     return (
@@ -73,7 +77,7 @@ function TableWrapper({ skeletonFiles }: { skeletonFiles: FileType[] }) {
         Ranger par ordre ... {sort === "desc" ? "Récent" : "Ancien"}
       </Button>
 
-      <DataTableUser columns={columns} data={initialFiles} />
+      <DataTable columns={columns} data={initialFiles} />
     </div>
   );
 }

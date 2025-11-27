@@ -5,6 +5,12 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 // BigInt serialization enhancement for JSON output
+declare global {
+  interface BigInt {
+    toJSON(): string;
+  }
+}
+
 BigInt.prototype.toJSON = function (): string {
   return this.toString();
 };

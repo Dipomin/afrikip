@@ -7,7 +7,7 @@ import ModernJournalUpload from "../../../components/ModernJournalUpload";
 import UserHeader from "../../../components/UserHeader";
 import { FileType } from "../../../typings";
 import { GetServerSideProps } from "next";
-import TableWrapper from "./components/table/TableWrapper";
+import TableWrapper from "../../../components/admin-journal/table/TableWrapper";
 import Layout from "../../../components/layout";
 import { Loader2, Shield, AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";

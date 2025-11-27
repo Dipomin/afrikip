@@ -15,8 +15,8 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { FileType } from "../../../../../typings";
-import { useAppStore } from "../../../../../store/store";
+import { FileType } from "../../../typings";
+import { useAppStore } from "../../../store/store";
 import { DeleteModal } from "../DeleteModal";
 import RenameModal from "../RenameModal";
 
@@ -145,7 +145,7 @@ import {
   TableRow,
 } from "../ui/table";
 import { FileType } from "../../../../typings";
-import { useAppStore } from "../../../../store/store";
+import { useAppStore } from "../../store/store";
 import { DeleteModal } from "../DeleteModal";
 import RenameModal from "../RenameModal";
 

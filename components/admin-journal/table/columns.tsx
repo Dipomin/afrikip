@@ -1,8 +1,8 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { COLOR_EXTENSION_MAP } from "../../../../../constant";
-import { FileType } from "../../../../../typings";
+import { COLOR_EXTENSION_MAP } from "../../../constant";
+import { FileType } from "../../../typings";
 import prettyBytes from "pretty-bytes";
 import { FileIcon, defaultStyles } from "react-file-icon";
 

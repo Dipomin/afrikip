@@ -4,7 +4,7 @@ import { collection, getDocs } from "firebase/firestore";
 import React from "react";
 
 import Link from "next/link";
-import { Button } from "../../components/ui/button";
+import { Button } from "../../../../../components/admin-journal/ui/button";
 import TableWrapperUser from "./TableWrapperUser";
 import ArchivesAnnees from "../../../../../components/archives-annees";
 
